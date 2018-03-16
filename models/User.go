@@ -8,6 +8,25 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
+type API interface {
+	Login(username string, password string)
+
+	FindUserById(id int) (bool, User)
+	FindUserByToken(token string) (bool, User)
+	FindUserByUserName(username string)
+	FindPermissionByUser(id int) []*Permission
+	FindPermissionByUserIdAndPermissionName(userId int, name string) bool
+	FindUserRolesByUserId(user_id int) []orm.Params
+
+	SaveUser(user *User) int64
+	SaveUserRole(user_id int, role_id int)
+	DeleteUser(user *User)
+	UpdateUser(user *User)
+	DeleteUserRolesByUserId(user_id int)
+
+	PageUser(p int, size int) utils.Page
+}
+
 type User struct {
 	Id        int    `orm:"pk;auto"`
 	Username  string `orm:"unique"`
