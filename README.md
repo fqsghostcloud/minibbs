@@ -24,11 +24,11 @@
 - 克隆代码到 $GOPATH/src 下
 - 安装上面的依赖
 - 安装 [bee](https://github.com/beego/bee) 工具
-- 在mysql数据库里创建数据库名字叫pybbs-go
-- 进入 pybbs-go 目录
+- 在mysql数据库里创建数据库名字叫minibbs
+- 进入 minibbs 目录
 - 修改conf/app.conf文件里的jdbc.username 和 jdbc.password
 - 运行 bee run
-- 将pybbs-go.sql导入数据库
+- 将minibbs.sql导入数据库
 - 浏览器输入 http://localhost:8080
 - 登录 用户名:朋也 密码:123123 默认是超级管理员,进去了可以体验权限部分
 
@@ -56,7 +56,7 @@
 
 欢迎大家提pr
 
-感谢 [@mikemouse2016](https://github.com/mikemouse2016) 的贡献，有需要装程序里的sql语句都改成orm实现的话，可以参见 [issues](https://github.com/tomoya92/pybbs-go/issues/2)
+感谢 [@mikemouse2016](https://github.com/mikemouse2016) 的贡献，有需要装程序里的sql语句都改成orm实现的话，可以参见 [issues](https://github.com/tomoya92/minibbs/issues/2)
 
 ## 捐赠
 

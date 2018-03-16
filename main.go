@@ -1,10 +1,10 @@
 package main
 
 import (
-	"pybbs-go/models"
-	_ "pybbs-go/routers"
-	_ "pybbs-go/templates"
-	_ "pybbs-go/utils"
+	"minibbs/models"
+	_ "minibbs/routers"
+	_ "minibbs/templates"
+	_ "minibbs/utils"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
