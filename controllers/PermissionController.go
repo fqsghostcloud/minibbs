@@ -17,12 +17,12 @@ func (c *PermissionController) List() {
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 	pid, _ := strconv.Atoi(c.Ctx.Input.Query("pid"))
 	if pid > 0 {
-		c.Data["Permissions"] = models.FindPermissionsByPid(pid)
+		c.Data["Permissions"] = models.PermissionManager.FindPermissionsByPid(pid)
 		c.Data["Pid"] = pid
 	} else {
-		c.Data["Permissions"] = models.FindPermissions()
+		c.Data["Permissions"] = models.PermissionManager.FindPermissions()
 	}
-	c.Data["ParantPermissions"] = models.FindPermissionsByPid(0)
+	c.Data["ParantPermissions"] = models.PermissionManager.FindPermissionsByPid(0)
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "permission/list.tpl"
 }
@@ -32,7 +32,7 @@ func (c *PermissionController) Add() {
 	c.Data["PageTitle"] = "添加权限"
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 	c.Data["Pid"] = c.Ctx.Input.Query("pid")
-	c.Data["ParantPermissions"] = models.FindPermissionsByPid(0)
+	c.Data["ParantPermissions"] = models.PermissionManager.FindPermissionsByPid(0)
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "permission/add.tpl"
 }
@@ -55,7 +55,7 @@ func (c *PermissionController) Save() {
 		c.Redirect("/permission/add?pid="+strconv.Itoa(pid), 302)
 	} else {
 		permission := models.Permission{Pid: pid, Name: name, Url: url, Description: description}
-		models.SavePermission(&permission)
+		models.PermissionManager.SavePermission(&permission)
 		c.Redirect("/permission/list?pid="+strconv.Itoa(pid), 302)
 	}
 }
@@ -65,8 +65,8 @@ func (c *PermissionController) Edit() {
 	c.Data["PageTitle"] = "编辑权限"
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	c.Data["Permission"] = models.FindPermissionById(id)
-	c.Data["ParantPermissions"] = models.FindPermissionsByPid(0)
+	c.Data["Permission"] = models.PermissionManager.FindPermissionById(id)
+	c.Data["ParantPermissions"] = models.PermissionManager.FindPermissionsByPid(0)
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "permission/edit.tpl"
 }
@@ -90,7 +90,7 @@ func (c *PermissionController) Update() {
 		c.Redirect("/permission/edit/"+strconv.Itoa(id), 302)
 	} else {
 		permission := models.Permission{Id: id, Pid: pid, Name: name, Url: url, Description: description}
-		models.UpdatePermission(&permission)
+		models.PermissionManager.UpdatePermission(&permission)
 		c.Redirect("/permission/list?pid="+strconv.Itoa(pid), 302)
 	}
 }
@@ -99,8 +99,8 @@ func (c *PermissionController) Delete() {
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
 		permission := models.Permission{Id: id}
-		models.DeleteRolePermissionByPermissionId(id)
-		models.DeletePermission(&permission)
+		models.PermissionManager.DeleteRolePermissionByPermissionId(id)
+		models.PermissionManager.DeletePermission(&permission)
 		c.Redirect("/permission/list", 302)
 	} else {
 		c.Ctx.WriteString("权限不存在")

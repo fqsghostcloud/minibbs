@@ -23,10 +23,10 @@ func (c *ReplyController) Save() {
 			c.Ctx.WriteString("回复的话题不存在")
 		} else {
 			_, user := filters.IsLogin(c.Ctx)
-			topic := models.FindTopicById(tid)
+			topic := models.TopicManager.FindTopicById(tid)
 			reply := models.Reply{Content: content, Topic: &topic, User: &user, Up: 0}
-			models.SaveReply(&reply)
-			models.IncrReplyCount(&topic)
+			models.ReplyManager.SaveReply(&reply)
+			models.TopicManager.IncrReplyCount(&topic)
 			c.Redirect("/topic/"+strconv.Itoa(tid), 302)
 		}
 	}
@@ -37,7 +37,7 @@ func (c *ReplyController) Up() {
 	result := utils.Result{Code: 200, Description: "成功"}
 	if rid > 0 {
 		_, user := filters.IsLogin(c.Ctx)
-		reply := models.FindReplyById(rid)
+		reply := models.ReplyManager.FindReplyById(rid)
 		replyUpLog := models.FindReplyUpLogByUserAndReply(&user, &reply)
 		if replyUpLog.Id > 0 {
 			result.Code = 201
@@ -46,7 +46,7 @@ func (c *ReplyController) Up() {
 			replyUpLog.User = &user
 			replyUpLog.Reply = &reply
 			models.SaveReplyUpLog(&replyUpLog)
-			models.UpReply(&reply)
+			models.ReplyManager.UpReply(&reply)
 		}
 	} else {
 		result.Code = 201
@@ -59,10 +59,10 @@ func (c *ReplyController) Up() {
 func (c *ReplyController) Delete() {
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
-		reply := models.FindReplyById(id)
-		tid := reply.Topic.Id
-		models.ReduceReplyCount(reply.Topic)
-		models.DeleteReply(&reply)
+		reply := models.ReplyManager.FindReplyById(id)
+		tid := reply.Topic.ID
+		models.TopicManager.ReduceReplyCount(reply.Topic)
+		models.ReplyManager.DeleteReply(&reply)
 		c.Redirect("/topic/"+strconv.Itoa(tid), 302)
 	} else {
 		c.Ctx.WriteString("回复不存在")

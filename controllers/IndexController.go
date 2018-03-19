@@ -25,7 +25,7 @@ func (c *IndexController) Index() {
 	s, _ := strconv.Atoi(c.Ctx.Input.Query("s"))
 	c.Data["S"] = s
 	section := models.Section{Id: s}
-	c.Data["Page"] = models.PageTopic(p, size, &section)
+	c.Data["Page"] = models.TopicManager.PageTopic(p, size, &section)
 	c.Data["Sections"] = models.FindAllSection()
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "index.tpl"

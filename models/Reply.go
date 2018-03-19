@@ -6,6 +6,17 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
+type ReplyAPI interface {
+	FindReplyById(id int) Reply
+	FindReplyByTopic(topic *Topic) []*Reply
+	SaveReply(reply *Reply) int64
+	UpReply(reply *Reply)
+	FindReplyByUser(user *User, limit int) []*Reply
+	DeleteReplyByTopic(topic *Topic)
+	DeleteReply(reply *Reply)
+	DeleteReplyByUser(user *User)
+}
+
 type Reply struct {
 	Id      int       `orm:"pk;auto"`
 	Topic   *Topic    `orm:"rel(fk)"`
@@ -15,14 +26,19 @@ type Reply struct {
 	InTime  time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
-func FindReplyById(id int) Reply {
+var ReplyManager ReplyAPI
+
+func init() {
+	ReplyManager = new(Reply)
+}
+func (r *Reply) FindReplyById(id int) Reply {
 	o := orm.NewOrm()
 	var reply Reply
 	o.QueryTable(reply).RelatedSel("Topic").Filter("Id", id).One(&reply)
 	return reply
 }
 
-func FindReplyByTopic(topic *Topic) []*Reply {
+func (r *Reply) FindReplyByTopic(topic *Topic) []*Reply {
 	o := orm.NewOrm()
 	var reply Reply
 	var replies []*Reply
@@ -30,19 +46,19 @@ func FindReplyByTopic(topic *Topic) []*Reply {
 	return replies
 }
 
-func SaveReply(reply *Reply) int64 {
+func (r *Reply) SaveReply(reply *Reply) int64 {
 	o := orm.NewOrm()
 	id, _ := o.Insert(reply)
 	return id
 }
 
-func UpReply(reply *Reply) {
+func (r *Reply) UpReply(reply *Reply) {
 	o := orm.NewOrm()
 	reply.Up = reply.Up + 1
 	o.Update(reply, "Up")
 }
 
-func FindReplyByUser(user *User, limit int) []*Reply {
+func (r *Reply) FindReplyByUser(user *User, limit int) []*Reply {
 	o := orm.NewOrm()
 	var reply Reply
 	var replies []*Reply
@@ -50,7 +66,7 @@ func FindReplyByUser(user *User, limit int) []*Reply {
 	return replies
 }
 
-func DeleteReplyByTopic(topic *Topic) {
+func (r *Reply) DeleteReplyByTopic(topic *Topic) {
 	o := orm.NewOrm()
 	var reply Reply
 	var replies []Reply
@@ -60,12 +76,12 @@ func DeleteReplyByTopic(topic *Topic) {
 	}
 }
 
-func DeleteReply(reply *Reply) {
+func (r *Reply) DeleteReply(reply *Reply) {
 	o := orm.NewOrm()
 	o.Delete(reply)
 }
 
-func DeleteReplyByUser(user *User) {
+func (r *Reply) DeleteReplyByUser(user *User) {
 	o := orm.NewOrm()
 	o.Raw("delete form reply where user_id = ?", user.ID).Exec()
 }

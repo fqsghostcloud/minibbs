@@ -37,7 +37,7 @@ func (c *TopicController) Save() {
 		section := models.Section{Id: s}
 		_, user := filters.IsLogin(c.Ctx)
 		topic := models.Topic{Title: title, Content: content, Section: &section, User: &user}
-		id := models.SaveTopic(&topic)
+		id := models.TopicManager.SaveTopic(&topic)
 		c.Redirect("/topic/"+strconv.FormatInt(id, 10), 302)
 	}
 }
@@ -47,11 +47,11 @@ func (c *TopicController) Detail() {
 	tid, _ := strconv.Atoi(id)
 	if tid > 0 {
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
-		topic := models.FindTopicById(tid)
-		models.IncrView(&topic) //查看+1
+		topic := models.TopicManager.FindTopicById(tid)
+		models.TopicManager.IncrView(&topic) //查看+1
 		c.Data["PageTitle"] = topic.Title
 		c.Data["Topic"] = topic
-		c.Data["Replies"] = models.FindReplyByTopic(&topic)
+		c.Data["Replies"] = models.ReplyManager.FindReplyByTopic(&topic)
 		c.Layout = "layout/layout.tpl"
 		c.TplName = "topic/detail.tpl"
 	} else {
@@ -63,7 +63,7 @@ func (c *TopicController) Edit() {
 	beego.ReadFromRequest(&c.Controller)
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
-		topic := models.FindTopicById(id)
+		topic := models.TopicManager.FindTopicById(id)
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 		c.Data["PageTitle"] = "编辑话题"
 		c.Data["Sections"] = models.FindAllSection()
@@ -90,11 +90,11 @@ func (c *TopicController) Update() {
 	} else {
 		s, _ := strconv.Atoi(sid)
 		section := models.Section{Id: s}
-		topic := models.FindTopicById(id)
+		topic := models.TopicManager.FindTopicById(id)
 		topic.Title = title
 		topic.Content = content
 		topic.Section = &section
-		models.UpdateTopic(&topic)
+		models.TopicManager.UpdateTopic(&topic)
 		c.Redirect("/topic/"+strconv.Itoa(id), 302)
 	}
 }
@@ -102,9 +102,9 @@ func (c *TopicController) Update() {
 func (c *TopicController) Delete() {
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
-		topic := models.FindTopicById(id)
-		models.DeleteTopic(&topic)
-		models.DeleteReplyByTopic(&topic)
+		topic := models.TopicManager.FindTopicById(id)
+		models.TopicManager.DeleteTopic(&topic)
+		models.ReplyManager.DeleteReplyByTopic(&topic)
 		c.Redirect("/", 302)
 	} else {
 		c.Ctx.WriteString("话题不存在")

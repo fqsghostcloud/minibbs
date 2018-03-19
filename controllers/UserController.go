@@ -21,8 +21,8 @@ func (c *UserController) Detail() {
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 		c.Data["PageTitle"] = "个人主页"
 		c.Data["CurrentUserInfo"] = user
-		c.Data["Topics"] = models.FindTopicByUser(&user, 7)
-		c.Data["Replies"] = models.FindReplyByUser(&user, 7)
+		c.Data["Topics"] = models.TopicManager.FindTopicByUser(&user, 7)
+		c.Data["Replies"] = models.ReplyManager.FindReplyByUser(&user, 7)
 	}
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "user/detail.tpl"
@@ -133,7 +133,7 @@ func (c *UserController) Edit() {
 		ok, user := models.UserManager.FindUserByID(id)
 		if ok {
 			c.Data["User"] = user
-			c.Data["Roles"] = models.FindRoles()
+			c.Data["Roles"] = models.RoleManager.FindRoles()
 			c.Data["UserRoles"] = models.UserManager.FindUserRolesByUserID(id)
 			c.Layout = "layout/layout.tpl"
 			c.TplName = "user/edit.tpl"
@@ -167,8 +167,8 @@ func (c *UserController) Delete() {
 	if id > 0 {
 		ok, user := models.UserManager.FindUserByID(id)
 		if ok {
-			models.DeleteTopicByUser(&user)
-			models.DeleteReplyByUser(&user)
+			models.TopicManager.DeleteTopicByUser(&user)
+			models.ReplyManager.DeleteReplyByUser(&user)
 			models.UserManager.DeleteUser(&user)
 		}
 		c.Redirect("/user/list", 302)
