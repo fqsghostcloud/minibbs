@@ -9,17 +9,17 @@
         <form method="post" action="/topic/create">
           <div class="form-group">
             <label for="title">标题</label>
-            <input type="text" class="form-control" id="title" name="title" placeholder="标题">
+            <input type="text" class="form-control" ID="title" name="title" placeholder="标题">
           </div>
           <div class="form-group">
             <label for="title">内容</label>
-            <textarea name="content" id="content" rows="15" class="form-control" placeholder="支持Markdown语法哦~"></textarea>
+            <textarea name="content" ID="content" rows="15" class="form-control" placeholder="支持Markdown语法哦~"></textarea>
           </div>
           <div class="form-group">
             <label for="title">版块</label>
-            <select name="sid" id="sid" class="form-control">
+            <select name="sid" ID="sid" class="form-control">
               {{range .Sections}}
-                <option value="{{.Id}}">{{.Name}}</option>
+                <option value="{{.ID}}">{{.Name}}</option>
               {{end}}
             </select>
           </div>

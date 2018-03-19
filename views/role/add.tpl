@@ -7,7 +7,7 @@
         <form action="/role/add" method="post">
           <div class="form-group">
             <label for="name">角色名称</label>
-            <input type="text" id="name" name="name" class="form-control">
+            <input type="text" ID="name" name="name" class="form-control">
           </div>
           <div class="form-group">
             <label>权限</label>
@@ -15,8 +15,8 @@
               {{range .Permissions}}
                 <h4><b>{{.Description}}</b></h4>
                 {{range .ChildPermissions}}
-                  <input type="checkbox" name="permissionIds" value="{{.Id}}" id="permission_{{.Id}}">
-                  <label for="permission_{{.Id}}">{{.Description}}</label>&nbsp;
+                  <input type="checkbox" name="permissionIds" value="{{.ID}}" ID="permission_{{.ID}}">
+                  <label for="permission_{{.ID}}">{{.Description}}</label>&nbsp;
                 {{end}}
               {{end}}
             </div>

@@ -18,8 +18,9 @@ func Markdown(content string) string {
 	return string(blackfriday.MarkdownCommon([]byte(utils.NoHtml(content))))
 }
 
-func HasPermission(userId int, name string) bool {
-	return models.FindPermissionByUserIdAndPermissionName(userId, name)
+// HasPermission .
+func HasPermission(userID int, name string) bool {
+	return models.FindPermissionByUserIDAndPermissionName(userID, name)
 }
 
 func init() {

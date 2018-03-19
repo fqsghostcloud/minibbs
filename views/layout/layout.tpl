@@ -25,7 +25,7 @@
         </button>
         <a class="navbar-brand" style="color:#fff;" href="/">Mini社区</a>
       </div>
-      <div id="navbar" class="navbar-collapse collapse header-navbar">
+      <div ID="navbar" class="navbar-collapse collapse header-navbar">
         <ul class="nav navbar-nav navbar-right">
           <li>
             <a href="/about">关于</a>
@@ -45,9 +45,9 @@
             <span class="dropdown-arrow"></span>
             <ul class="dropdown-menu">
               <li><a href="/user/setting">个人资料</a></li>
-              {{if haspermission .UserInfo.Id "user:list"}}<li><a href="/user/list">用户管理</a></li>{{end}}
-              {{if haspermission .UserInfo.Id "role:list"}}<li><a href="/role/list">角色管理</a></li>{{end}}
-              {{if haspermission .UserInfo.Id "permission:list"}}<li><a href="/permission/list">权限管理</a></li>{{end}}
+              {{if haspermission .UserInfo.ID "user:list"}}<li><a href="/user/list">用户管理</a></li>{{end}}
+              {{if haspermission .UserInfo.ID "role:list"}}<li><a href="/role/list">角色管理</a></li>{{end}}
+              {{if haspermission .UserInfo.ID "permission:list"}}<li><a href="/permission/list">权限管理</a></li>{{end}}
               <li><a href="/logout">退出</a></li>
             </ul>
           </li>

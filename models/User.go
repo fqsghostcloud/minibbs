@@ -8,78 +8,105 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
+// API user api
 type API interface {
-	Login(username string, password string)
+	Login(username string, password string) (bool, User)
 
-	FindUserById(id int) (bool, User)
+	FindUserByID(id int) (bool, User)
 	FindUserByToken(token string) (bool, User)
-	FindUserByUserName(username string)
+	FindUserByUserName(username string) (bool, User)
 	FindPermissionByUser(id int) []*Permission
-	FindPermissionByUserIdAndPermissionName(userId int, name string) bool
-	FindUserRolesByUserId(user_id int) []orm.Params
+	FindUserRolesByUserID(userID int) []orm.Params
 
 	SaveUser(user *User) int64
-	SaveUserRole(user_id int, role_id int)
+	SaveUserRole(userID int, roleID int)
 	DeleteUser(user *User)
 	UpdateUser(user *User)
-	DeleteUserRolesByUserId(user_id int)
+	DeleteUserRolesByUserID(userID int)
 
 	PageUser(p int, size int) utils.Page
 }
 
+// User ..
 type User struct {
-	Id        int    `orm:"pk;auto"`
+	ID        int    `orm:"pk;auto"`
 	Username  string `orm:"unique"`
 	Password  string
 	Token     string `orm:"unique"`
 	Avatar    string
 	Email     string    `orm:"null"`
-	Url       string    `orm:"null"`
+	URL       string    `orm:"null"`
 	Signature string    `orm:"null;size(1000)"`
 	InTime    time.Time `orm:"auto_now_add;type(datetime)"`
 	Roles     []*Role   `orm:"rel(m2m)"`
 }
 
-func FindUserById(id int) (bool, User) {
-	o := orm.NewOrm()
-	var user User
-	err := o.QueryTable(user).Filter("Id", id).One(&user)
-	return err != orm.ErrNoRows, user
+// UserManager manager user api
+var UserManager API
+
+func init() {
+	UserManager = new(User)
 }
 
-func FindUserByToken(token string) (bool, User) {
+// FindPermissionByUserIDAndPermissionName .
+func FindPermissionByUserIDAndPermissionName(userID int, name string) bool {
+	o := orm.NewOrm()
+	var permission Permission
+	o.Raw("select p.* from permission p "+
+		"left join role_permissions rp on p.id = rp.permission_id "+
+		"left join role r on rp.role_id = r.id "+
+		"left join user_roles ur on r.id = ur.role_id "+
+		"left join user u on ur.user_id = u.id "+
+		"where u.id = ? and p.name = ?", userID, name).QueryRow(&permission)
+	return permission.Id > 0
+}
+
+// FindUserByID .
+func (u *User) FindUserByID(ID int) (bool, User) {
+	o := orm.NewOrm()
+	err := o.QueryTable(*u).Filter("Id", ID).One(u)
+	return err != orm.ErrNoRows, *u
+}
+
+// FindUserByToken .
+func (u *User) FindUserByToken(token string) (bool, User) {
 	o := orm.NewOrm()
 	var user User
 	err := o.QueryTable(user).Filter("Token", token).One(&user)
 	return err != orm.ErrNoRows, user
 }
 
-func Login(username string, password string) (bool, User) {
+// Login .
+func (u *User) Login(username string, password string) (bool, User) {
 	o := orm.NewOrm()
 	var user User
 	err := o.QueryTable(user).Filter("Username", username).Filter("Password", password).One(&user)
 	return err != orm.ErrNoRows, user
 }
 
-func FindUserByUserName(username string) (bool, User) {
+// FindUserByUserName .
+func (u *User) FindUserByUserName(username string) (bool, User) {
 	o := orm.NewOrm()
 	var user User
 	err := o.QueryTable(user).Filter("Username", username).One(&user)
 	return err != orm.ErrNoRows, user
 }
 
-func SaveUser(user *User) int64 {
+// SaveUser .
+func (u *User) SaveUser(user *User) int64 {
 	o := orm.NewOrm()
 	id, _ := o.Insert(user)
 	return id
 }
 
-func UpdateUser(user *User) {
+// UpdateUser .
+func (u *User) UpdateUser(user *User) {
 	o := orm.NewOrm()
 	o.Update(user)
 }
 
-func PageUser(p int, size int) utils.Page {
+// PageUser .
+func (u *User) PageUser(p int, size int) utils.Page {
 	o := orm.NewOrm()
 	var user User
 	var list []User
@@ -90,7 +117,8 @@ func PageUser(p int, size int) utils.Page {
 	return utils.PageUtil(c, p, size, list)
 }
 
-func FindPermissionByUser(id int) []*Permission {
+// FindPermissionByUser .
+func (u *User) FindPermissionByUser(ID int) []*Permission {
 	o := orm.NewOrm()
 	var permissions []*Permission
 	o.Raw("select p.* from permission p "+
@@ -98,40 +126,32 @@ func FindPermissionByUser(id int) []*Permission {
 		"left join role r on rp.role_id = r.id "+
 		"left join user_roles ur on r.id = ur.role_id "+
 		"left join user u on ur.user_id = u.id "+
-		"where u.id = ?", id).QueryRows(&permissions)
+		"where u.id = ?", ID).QueryRows(&permissions)
 	return permissions
 }
 
-func FindPermissionByUserIdAndPermissionName(userId int, name string) bool {
-	o := orm.NewOrm()
-	var permission Permission
-	o.Raw("select p.* from permission p "+
-		"left join role_permissions rp on p.id = rp.permission_id "+
-		"left join role r on rp.role_id = r.id "+
-		"left join user_roles ur on r.id = ur.role_id "+
-		"left join user u on ur.user_id = u.id "+
-		"where u.id = ? and p.name = ?", userId, name).QueryRow(&permission)
-	return permission.Id > 0
-}
-
-func DeleteUser(user *User) {
+// DeleteUser .
+func (u *User) DeleteUser(user *User) {
 	o := orm.NewOrm()
 	o.Delete(user)
 }
 
-func DeleteUserRolesByUserId(user_id int) {
+// DeleteUserRolesByUserID .
+func (u *User) DeleteUserRolesByUserID(userID int) {
 	o := orm.NewOrm()
-	o.Raw("delete from user_roles where user_id = ?", user_id).Exec()
+	o.Raw("delete from user_roles where user_id = ?", userID).Exec()
 }
 
-func SaveUserRole(user_id int, role_id int) {
+// SaveUserRole .
+func (u *User) SaveUserRole(userID int, roleID int) {
 	o := orm.NewOrm()
-	o.Raw("insert into user_roles (user_id, role_id) values (?, ?)", user_id, role_id).Exec()
+	o.Raw("insert into user_roles (user_id, role_id) values (?, ?)", userID, roleID).Exec()
 }
 
-func FindUserRolesByUserId(user_id int) []orm.Params {
+// FindUserRolesByUserID .
+func (u *User) FindUserRolesByUserID(userID int) []orm.Params {
 	o := orm.NewOrm()
 	var res []orm.Params
-	o.Raw("select id, user_id, role_id from user_roles where user_id = ?", user_id).Values(&res, "id", "user_id", "role_id")
+	o.Raw("select id, user_id, role_id from user_roles where user_id = ?", userID).Values(&res, "id", "user_id", "role_id")
 	return res
 }

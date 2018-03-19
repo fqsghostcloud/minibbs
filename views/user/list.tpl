@@ -12,7 +12,7 @@
           <tr>
             <td>{{.Id}}</td>
             <td><a href="/user/{{.Username}}" target="_blank">{{.Username}}</a></td>
-            <td>{{if .Url}}<a href="{{.Url}}" target="_blank">{{.Url}}</a>{{end}}</td>
+            <td>{{if .URL}}<a href="{{.URL}}" target="_blank">{{.URL}}</a>{{end}}</td>
             <td>
               <a href="/user/edit/{{.Id}}" class="btn btn-xs btn-warning">配置角色</a>
               <a href="javascript:if(confirm('确认删除吗?')) location.href='/user/delete/{{.Id}}'" class="btn btn-xs btn-danger">删除</a>

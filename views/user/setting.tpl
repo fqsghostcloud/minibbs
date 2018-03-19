@@ -23,8 +23,8 @@
             <input type="text" class="form-control" name="email" id="email" value="{{.UserInfo.Email}}">
           </div>
           <div class="form-group">
-            <label for="url">个人主页</label>
-            <input type="text" class="form-control" name="url" id="url" name="url" value="{{.UserInfo.Url}}">
+            <label for="URL">个人主页</label>
+            <input type="text" class="form-control" name="URL" id="URL" name="URL" value="{{.UserInfo.URL}}">
           </div>
           <div class="form-group">
             <label for="signature">个性签名</label>

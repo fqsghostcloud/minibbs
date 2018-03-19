@@ -2,15 +2,16 @@ package models
 
 import (
 	"time"
+
 	"github.com/astaxie/beego/orm"
 )
 
 type Reply struct {
-	Id      int `orm:"pk;auto"`
-	Topic   *Topic `orm:"rel(fk)"`
-	Content string `orm:"type(text)"`
-	User    *User `orm:"rel(fk)"`
-	Up      int `orm:"default(0)"`
+	Id      int       `orm:"pk;auto"`
+	Topic   *Topic    `orm:"rel(fk)"`
+	Content string    `orm:"type(text)"`
+	User    *User     `orm:"rel(fk)"`
+	Up      int       `orm:"default(0)"`
 	InTime  time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
@@ -65,6 +66,6 @@ func DeleteReply(reply *Reply) {
 }
 
 func DeleteReplyByUser(user *User) {
-    o := orm.NewOrm()
-    o.Raw("delete form reply where user_id = ?", user.Id).Exec()
+	o := orm.NewOrm()
+	o.Raw("delete form reply where user_id = ?", user.ID).Exec()
 }

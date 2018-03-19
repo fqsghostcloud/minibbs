@@ -10,13 +10,13 @@
           <tbody>
           {{range .Permissions}}
           <tr>
-            <td>{{.Id}}</td>
+            <td>{{.ID}}</td>
             <td>{{.Name}}</td>
             <td>{{.Url}}</td>
             <td>{{.Description}}</td>
             <td>
-              <a href="/permission/edit/{{.Id}}" class="btn btn-xs btn-warning">编辑</a>
-              <a href="javascript:if(confirm('确认删除吗?')) location.href='/permission/delete/{{.Id}}'" class="btn btn-xs btn-danger">删除</a>
+              <a href="/permission/edit/{{.ID}}" class="btn btn-xs btn-warning">编辑</a>
+              <a href="javascript:if(confirm('确认删除吗?')) location.href='/permission/delete/{{.ID}}'" class="btn btn-xs btn-danger">删除</a>
             </td>
           </tr>
           {{end}}
@@ -30,9 +30,9 @@
       <div class="panel-heading">父节点</div>
       <div class="list-group">
         {{range .ParantPermissions}}
-        <li class="list-group-item permission-item" id="list-group-item-{{.Id}}">
-          <a href="javascript:if(confirm('确认删除吗?'))location.href='/permission/delete/{{.Id}}'">删除</a>
-          <a href="/permission/list?pid={{.Id}}">
+        <li class="list-group-item permission-item" ID="list-group-item-{{.ID}}">
+          <a href="javascript:if(confirm('确认删除吗?'))location.href='/permission/delete/{{.ID}}'">删除</a>
+          <a href="/permission/list?pid={{.ID}}">
             {{.Description}}
           </a>
         </li>

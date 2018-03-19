@@ -13,7 +13,7 @@ type IndexController struct {
 	beego.Controller
 }
 
-//首页
+// Index .
 func (c *IndexController) Index() {
 	c.Data["PageTitle"] = "首页"
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
@@ -31,14 +31,14 @@ func (c *IndexController) Index() {
 	c.TplName = "index.tpl"
 }
 
-//登录页
+// LoginPage .
 func (c *IndexController) LoginPage() {
 	IsLogin, _ := filters.IsLogin(c.Ctx)
 	if IsLogin {
 		c.Redirect("/", 302)
 	} else {
 		beego.ReadFromRequest(&c.Controller)
-		u := models.FindPermissionByUser(1)
+		u := models.UserManager.FindPermissionByUser(1)
 		beego.Debug(u)
 		c.Data["PageTitle"] = "登录"
 		c.Layout = "layout/layout.tpl"
@@ -46,11 +46,11 @@ func (c *IndexController) LoginPage() {
 	}
 }
 
-//验证登录
+// Login .
 func (c *IndexController) Login() {
 	flash := beego.NewFlash()
 	username, password := c.Input().Get("username"), c.Input().Get("password")
-	if flag, user := models.Login(username, password); flag {
+	if flag, user := models.UserManager.Login(username, password); flag {
 		c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), user.Token, 30*24*60*60, "/", beego.AppConfig.String("cookie.domain"), false, true)
 		c.Redirect("/", 302)
 	} else {
@@ -60,7 +60,7 @@ func (c *IndexController) Login() {
 	}
 }
 
-//注册页
+// RegisterPage .
 func (c *IndexController) RegisterPage() {
 	IsLogin, _ := filters.IsLogin(c.Ctx)
 	if IsLogin {
@@ -73,7 +73,7 @@ func (c *IndexController) RegisterPage() {
 	}
 }
 
-//验证注册
+// Register .
 func (c *IndexController) Register() {
 	flash := beego.NewFlash()
 	username, password := c.Input().Get("username"), c.Input().Get("password")
@@ -81,27 +81,27 @@ func (c *IndexController) Register() {
 		flash.Error("用户名或密码不能为空")
 		flash.Store(&c.Controller)
 		c.Redirect("/register", 302)
-	} else if flag, _ := models.FindUserByUserName(username); flag {
+	} else if flag, _ := models.UserManager.FindUserByUserName(username); flag {
 		flash.Error("用户名已被注册")
 		flash.Store(&c.Controller)
 		c.Redirect("/register", 302)
 	} else {
 		var token = uuid.Rand().Hex()
 		user := models.User{Username: username, Password: password, Avatar: "/static/imgs/avatar.png", Token: token}
-		models.SaveUser(&user)
+		models.UserManager.SaveUser(&user)
 		// others are ordered as cookie's max age time, path,domain, secure and httponly.
 		c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), token, 30*24*60*60, "/", beego.AppConfig.String("cookie.domain"), false, true)
 		c.Redirect("/", 302)
 	}
 }
 
-//登出
+// Logout .
 func (c *IndexController) Logout() {
 	c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), "", -1, "/", beego.AppConfig.String("cookie.domain"), false, true)
 	c.Redirect("/", 302)
 }
 
-//关于
+// About .
 func (c *IndexController) About() {
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 	c.Data["PageTitle"] = "关于"

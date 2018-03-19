@@ -16,7 +16,7 @@ type UserController struct {
 
 func (c *UserController) Detail() {
 	username := c.Ctx.Input.Param(":username")
-	ok, user := models.FindUserByUserName(username)
+	ok, user := models.UserManager.FindUserByUserName(username)
 	if ok {
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 		c.Data["PageTitle"] = "个人主页"
@@ -56,9 +56,9 @@ func (c *UserController) Setting() {
 	}
 	_, user := filters.IsLogin(c.Ctx)
 	user.Email = email
-	user.Url = url
+	user.URL = url
 	user.Signature = signature
-	models.UpdateUser(&user)
+	models.UserManager.UpdateUser(&user)
 	flash.Success("更新资料成功")
 	flash.Store(&c.Controller)
 	c.Redirect("/user/setting", 302)
@@ -81,7 +81,7 @@ func (c *UserController) UpdatePwd() {
 		return
 	}
 	user.Password = newpwd
-	models.UpdateUser(&user)
+	models.UserManager.UpdateUser(&user)
 	flash.Success("密码修改成功")
 	flash.Store(&c.Controller)
 	c.Redirect("/user/setting", 302)
@@ -105,7 +105,7 @@ func (c *UserController) UpdateAvatar() {
 		c.SaveToFile("avatar", "static/upload/avatar/"+h.Filename)
 		_, user := filters.IsLogin(c.Ctx)
 		user.Avatar = "/static/upload/avatar/" + h.Filename
-		models.UpdateUser(&user)
+		models.UserManager.UpdateUser(&user)
 		flash.Success("上传成功")
 		flash.Store(&c.Controller)
 		c.Redirect("/user/setting", 302)
@@ -120,7 +120,7 @@ func (c *UserController) List() {
 		p = 1
 	}
 	size, _ := beego.AppConfig.Int("page.size")
-	c.Data["Page"] = models.PageUser(p, size)
+	c.Data["Page"] = models.UserManager.PageUser(p, size)
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "user/list.tpl"
 }
@@ -130,11 +130,11 @@ func (c *UserController) Edit() {
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
-		ok, user := models.FindUserById(id)
+		ok, user := models.UserManager.FindUserByID(id)
 		if ok {
 			c.Data["User"] = user
 			c.Data["Roles"] = models.FindRoles()
-			c.Data["UserRoles"] = models.FindUserRolesByUserId(id)
+			c.Data["UserRoles"] = models.UserManager.FindUserRolesByUserID(id)
 			c.Layout = "layout/layout.tpl"
 			c.TplName = "user/edit.tpl"
 		} else {
@@ -151,10 +151,10 @@ func (c *UserController) Update() {
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	roleIds := c.GetStrings("roleIds")
 	if id > 0 {
-		models.DeleteUserRolesByUserId(id)
+		models.UserManager.DeleteUserRolesByUserID(id)
 		for _, v := range roleIds {
 			roleId, _ := strconv.Atoi(v)
-			models.SaveUserRole(id, roleId)
+			models.UserManager.SaveUserRole(id, roleId)
 		}
 		c.Redirect("/user/list", 302)
 	} else {
@@ -165,11 +165,11 @@ func (c *UserController) Update() {
 func (c *UserController) Delete() {
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
-		ok, user := models.FindUserById(id)
+		ok, user := models.UserManager.FindUserByID(id)
 		if ok {
 			models.DeleteTopicByUser(&user)
 			models.DeleteReplyByUser(&user)
-			models.DeleteUser(&user)
+			models.UserManager.DeleteUser(&user)
 		}
 		c.Redirect("/user/list", 302)
 	} else {

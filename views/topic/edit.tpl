@@ -6,20 +6,20 @@
       </div>
       <div class="panel-body">
         {{template "../components/flash_error.tpl" .}}
-        <form method="post" action="/topic/edit/{{.Topic.Id}}">
+        <form method="post" action="/topic/edit/{{.Topic.ID}}">
           <div class="form-group">
             <label for="title">标题</label>
-            <input type="text" class="form-control" id="title" name="title" value="{{.Topic.Title}}" placeholder="标题">
+            <input type="text" class="form-control" ID="title" name="title" value="{{.Topic.Title}}" placeholder="标题">
           </div>
           <div class="form-group">
             <label for="title">内容</label>
-            <textarea name="content" id="content" rows="15" class="form-control" placeholder="支持Markdown语法哦~">{{.Topic.Content}}</textarea>
+            <textarea name="content" ID="content" rows="15" class="form-control" placeholder="支持Markdown语法哦~">{{.Topic.Content}}</textarea>
           </div>
           <div class="form-group">
             <label for="title">版块</label>
-            <select name="sid" id="sid" class="form-control">
+            <select name="sid" ID="sid" class="form-control">
               {{range .Sections}}
-                <option value="{{.Id}}">{{.Name}}</option>
+                <option value="{{.ID}}">{{.Name}}</option>
               {{end}}
             </select>
           </div>
@@ -31,6 +31,6 @@
 </div>
 <script type="text/javascript">
   $(function () {
-    $("#sid").val('{{.Topic.Section.Id}}')
+    $("#sid").val('{{.Topic.Section.ID}}')
   });
 </script>
