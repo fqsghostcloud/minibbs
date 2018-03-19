@@ -33,7 +33,7 @@ type User struct {
 	Username  string `orm:"unique"`
 	Password  string
 	Token     string `orm:"unique"`
-	Avatar    string
+	Image     string
 	Email     string    `orm:"null"`
 	URL       string    `orm:"null"`
 	Signature string    `orm:"null;size(1000)"`

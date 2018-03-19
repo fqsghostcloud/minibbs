@@ -104,7 +104,7 @@ func (c *UserController) UpdateAvatar() {
 	} else {
 		c.SaveToFile("avatar", "static/upload/avatar/"+h.Filename)
 		_, user := filters.IsLogin(c.Ctx)
-		user.Avatar = "/static/upload/avatar/" + h.Filename
+		user.Image = "/static/upload/avatar/" + h.Filename
 		models.UserManager.UpdateUser(&user)
 		flash.Success("上传成功")
 		flash.Store(&c.Controller)

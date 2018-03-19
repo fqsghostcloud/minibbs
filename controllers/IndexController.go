@@ -3,6 +3,7 @@ package controllers
 import (
 	"minibbs/filters"
 	"minibbs/models"
+	"net/http"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -80,18 +81,18 @@ func (c *IndexController) Register() {
 	if len(username) == 0 || len(password) == 0 {
 		flash.Error("用户名或密码不能为空")
 		flash.Store(&c.Controller)
-		c.Redirect("/register", 302)
-	} else if flag, _ := models.UserManager.FindUserByUserName(username); flag {
+		c.Redirect("/register", http.StatusFound) //重定向，资源暂时性转移302
+	} else if exsit, _ := models.UserManager.FindUserByUserName(username); exsit {
 		flash.Error("用户名已被注册")
 		flash.Store(&c.Controller)
-		c.Redirect("/register", 302)
+		c.Redirect("/register", http.StatusFound)
 	} else {
 		var token = uuid.Rand().Hex()
-		user := models.User{Username: username, Password: password, Avatar: "/static/imgs/avatar.png", Token: token}
+		user := models.User{Username: username, Password: password, Image: "/static/imgs/avatar.png", Token: token}
 		models.UserManager.SaveUser(&user)
 		// others are ordered as cookie's max age time, path,domain, secure and httponly.
 		c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), token, 30*24*60*60, "/", beego.AppConfig.String("cookie.domain"), false, true)
-		c.Redirect("/", 302)
+		c.Redirect("/", http.StatusFound)
 	}
 }
 
