@@ -52,14 +52,22 @@ func (c *IndexController) LoginPage() {
 func (c *IndexController) Login() {
 	flash := beego.NewFlash()
 	username, password := c.Input().Get("username"), c.Input().Get("password")
-	if flag, user := models.UserManager.Login(username, password); flag {
-		c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), user.Token, 30*24*60*60, "/", beego.AppConfig.String("cookie.domain"), false, true)
-		c.Redirect("/", 302)
-	} else {
-		flash.Error("用户名或密码错误")
+
+	exsit, user, err := models.UserManager.Login(username, password)
+	if err != nil {
+		flash.Error(err.Error())
 		flash.Store(&c.Controller)
 		c.Redirect("/login", 302)
 	}
+
+	if exsit {
+		c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), user.Token, 30*24*60*60, "/", beego.AppConfig.String("cookie.domain"), false, true)
+		c.Redirect("/", 302)
+	}
+
+	flash.Error("用户名或密码错误")
+	flash.Store(&c.Controller)
+	c.Redirect("/login", 302)
 }
 
 // RegisterPage .

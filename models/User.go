@@ -11,8 +11,8 @@ import (
 
 // API user api
 type API interface {
-	Login(username string, password string) (bool, User)
-	IsActive(username string) (bool, error)
+	Login(username string, password string) (bool, *User, error)
+	IsActive(username string) bool
 
 	ActiveUserByEmail(email string) error
 	ActiveAccount(email string) error
@@ -73,17 +73,15 @@ func (u *User) ExsitUser(username string) bool {
 }
 
 // IsActive check user whether activve
-func (u *User) IsActive(username string) (bool, error) {
+func (u *User) IsActive(username string) bool {
 	var user User
 	o := orm.NewOrm()
 	qs := o.QueryTable(user)
 	err := qs.Filter("Username", username).One(&user)
-
 	if err != nil {
-		return false, err
+		fmt.Println(err.Error())
 	}
-
-	return user.Active == true, nil
+	return user.Active == true
 }
 
 // GetUserByEmail ..
@@ -122,10 +120,7 @@ func (u *User) ActiveUser(username string) error {
 		return fmt.Errorf("%s", "用户不存在")
 	}
 
-	isActive, err := u.IsActive(username)
-	if err != nil {
-		return err
-	}
+	isActive := u.IsActive(username)
 
 	if isActive {
 		err := fmt.Errorf("user[%s] already active", username)
@@ -139,7 +134,7 @@ func (u *User) ActiveUser(username string) error {
 	var user User
 
 	qs := o.QueryTable(user)
-	_, err = qs.Filter("Username", username).Update(orm.Params{"Active": true})
+	_, err := qs.Filter("Username", username).Update(orm.Params{"Active": true})
 	if err != nil {
 		return err
 	}
@@ -169,10 +164,7 @@ func (u *User) DeactiveUser(username string) error {
 		return fmt.Errorf("%s", "用户不存在")
 	}
 
-	isActive, err := u.IsActive(username)
-	if err != nil {
-		return err
-	}
+	isActive := u.IsActive(username)
 
 	if !isActive {
 		err := fmt.Errorf("user[%s] already inactive", username)
@@ -183,7 +175,7 @@ func (u *User) DeactiveUser(username string) error {
 	o := orm.NewOrm()
 	qs := o.QueryTable(user)
 
-	_, err = qs.Filter("Username", username).Update(orm.Params{"Active": false})
+	_, err := qs.Filter("Username", username).Update(orm.Params{"Active": false})
 	if err != nil {
 		return err
 	}
@@ -220,11 +212,20 @@ func (u *User) FindUserByToken(token string) (bool, User) {
 }
 
 // Login .
-func (u *User) Login(username string, password string) (bool, User) {
+func (u *User) Login(username string, password string) (bool, *User, error) {
+
+	if !u.ExsitUser(username) {
+		return false, nil, fmt.Errorf("该用户不存在")
+	}
+
+	if !u.IsActive(username) {
+		return false, nil, fmt.Errorf("该用户帐号未激活")
+	}
+
 	o := orm.NewOrm()
 	var user User
 	err := o.QueryTable(user).Filter("Username", username).Filter("Password", password).One(&user)
-	return err != orm.ErrNoRows, user
+	return err != orm.ErrNoRows, &user, nil
 }
 
 // FindUserByUserName .
