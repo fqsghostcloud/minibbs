@@ -41,7 +41,7 @@ func (c *IndexController) LoginPage() {
 	} else {
 		beego.ReadFromRequest(&c.Controller)
 		u := models.UserManager.FindPermissionByUser(1)
-		beego.Debug(u)
+		beego.Debug(u) // ????????????????????????????????
 		c.Data["PageTitle"] = "登录"
 		c.Layout = "layout/layout.tpl"
 		c.TplName = "login.tpl"
@@ -151,6 +151,7 @@ func (c *IndexController) Register() {
 
 // ActiveAccount activation user account by check email
 func (c *IndexController) ActiveAccount() {
+	flash := beego.NewFlash()
 	token := c.GetString("token")
 	fmt.Println("token: " + token)
 
@@ -161,17 +162,23 @@ func (c *IndexController) ActiveAccount() {
 			err := models.UserManager.ActiveAccount(email)
 			if err != nil {
 				// glog.Errorf("active user by email error[%s]\n", err.Error())
-				c.Ctx.WriteString("激活账户时发生错误，请联系管理员 " + err.Error())
+				flash.Error("激活账户时发生错误，请联系管理员 " + err.Error())
+				flash.Store(&c.Controller)
+				c.Redirect("/login", http.StatusFound)
 				return
 			}
 		}
 		//需要设置cookie???????
 		// c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), token, 30 * 24 * 60 * 60, "/", beego.AppConfig.String("cookie.domain"), false, true)
-		c.Ctx.WriteString("激活账户成功")
+		flash.Success("激活账户成功")
+		flash.Store(&c.Controller)
+		c.Redirect("/login", http.StatusFound)
 		return
 	}
 
-	c.Ctx.WriteString("发送注册邮件时发生错误，请联系管理员")
+	flash.Error("发送注册邮件时发生错误，请联系管理员")
+	flash.Store(&c.Controller)
+	c.Redirect("/login", http.StatusFound)
 	return
 }
 

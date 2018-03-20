@@ -13,11 +13,11 @@
         {{range .Page.List}}
         <div class="media">
           <div class="media-left">
-            <a href="/user/{{.User.Username}}"><img src="{{.User.Avatar}}" class="avatar" alt="{{.User.Username}}"></a>
+            <a href="/user/{{.User.Username}}"><img src="{{.User.Image}}" class="avatar" alt="{{.User.Username}}"></a>
           </div>
           <div class="media-body">
             <div class="title">
-              <a href="/topic/{{.Id}}">{{.Title}}</a>
+              <a href="/topic/{{.ID}}">{{.Title}}</a>
             </div>
             <p class="gray">
               <span class="label label-primary">{{.Section.Name}}</span>

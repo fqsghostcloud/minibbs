@@ -4,6 +4,7 @@
       <div class="panel-heading">登录</div>
       <div class="panel-body">
         {{template "components/flash_error.tpl" .}}
+        {{template "components/flash_success.tpl" .}}
         <form action="/login" method="post">
           <div class="form-group">
             <label for="username">用户名</label>

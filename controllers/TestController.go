@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"minibbs/models"
+	"fmt"
 
 	"github.com/astaxie/beego"
 )
@@ -11,13 +11,9 @@ type TestController struct {
 }
 
 func (c *TestController) TestActive() {
-	email := c.GetString("email")
-	err := models.UserManager.ActiveAccount(email)
-	if err != nil {
-		// glog.Errorf("active user by email error[%s]\n", err.Error())
-		c.Ctx.WriteString("激活账户时发生错误，请联系管理员 " + err.Error())
-		return
-	}
-
-	c.Ctx.WriteString("激活成功")
+	out := c.GetString("in")
+	fmt.Println(out)
+	c.Data["PageTitle"] = "用户注册"
+	c.Layout = "layout/layout.tpl"
+	c.TplName = "basic.tpl"
 }
