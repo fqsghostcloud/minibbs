@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/astaxie/beego"
+	"github.com/sluu99/uuid"
 )
 
 type IndexController struct {
@@ -96,14 +97,15 @@ func (c *IndexController) Register() {
 		return
 	}
 
-	// if exsit, _ := models.UserManager.FindUserByUserEmail(email); exsit {
-	// 	flash.Error("邮箱已被注册")
-	// 	flash.Store(&c.Controller)
-	// 	c.Redirect("/register", http.StatusFound)
-	// 	return
-	// }
+	if exsit, _ := models.UserManager.FindUserByUserEmail(email); exsit {
+		flash.Error("邮箱已被注册")
+		flash.Store(&c.Controller)
+		c.Redirect("/register", http.StatusFound)
+		return
+	}
 
 	authURL := models.EmailManager.GenerateAuthURL(email)
+	fmt.Printf("\n%s\n", authURL)
 	models.EmailManager.SetTheme("用户帐号激活") //设置主题
 	models.EmailManager.SetEmailContent(authURL)
 
@@ -123,14 +125,23 @@ func (c *IndexController) Register() {
 		return
 	}
 
+	var token = uuid.Rand().Hex() // token 唯一
+
 	user := models.User{
 		Username: username,
 		Password: password,
 		Email:    email,
+		Active:   false,
+		Token:    token,
 		Image:    "/static/imgs/default.png",
 	}
 
-	models.UserManager.SaveUser(&user)
+	if err := models.UserManager.SaveUser(&user); err != nil {
+		flash.Error("注册用户失败:" + err.Error())
+		flash.Store(&c.Controller)
+		c.Redirect("/register", http.StatusFound)
+		return
+	}
 
 	flash.Success("注册验证邮件已经发送到您的邮箱，请激活后再登录")
 	flash.Store(&c.Controller)
@@ -140,7 +151,6 @@ func (c *IndexController) Register() {
 
 // ActiveAccount activation user account by check email
 func (c *IndexController) ActiveAccount() {
-	flash := beego.NewFlash()
 	token := c.GetString("token")
 	fmt.Println("token: " + token)
 
@@ -151,16 +161,17 @@ func (c *IndexController) ActiveAccount() {
 			err := models.UserManager.ActiveAccount(email)
 			if err != nil {
 				// glog.Errorf("active user by email error[%s]\n", err.Error())
-				flash.Error("激活账户时发生错误，请联系管理员")
+				c.Ctx.WriteString("激活账户时发生错误，请联系管理员 " + err.Error())
 				return
 			}
 		}
-
-		flash.Success("激活账户成功")
+		//需要设置cookie???????
+		// c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), token, 30 * 24 * 60 * 60, "/", beego.AppConfig.String("cookie.domain"), false, true)
+		c.Ctx.WriteString("激活账户成功")
 		return
 	}
 
-	flash.Error("发送注册邮件时发生错误，请联系管理员")
+	c.Ctx.WriteString("发送注册邮件时发生错误，请联系管理员")
 	return
 }
 

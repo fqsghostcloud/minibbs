@@ -27,7 +27,7 @@ type API interface {
 	FindPermissionByUser(id int) []*Permission
 	FindUserRolesByUserID(userID int) []orm.Params
 
-	SaveUser(user *User) int64
+	SaveUser(user *User) error
 	SaveUserRole(userID int, roleID int)
 	DeleteUser(user *User)
 	UpdateUser(user *User)
@@ -103,7 +103,7 @@ func (u *User) GetUserByEmail(email string) (string, error) {
 
 // ActiveUserByEmail ..
 func (u *User) ActiveUserByEmail(email string) error {
-	exsit, user := u.FindUserByUserName(email)
+	exsit, user := u.FindUserByUserEmail(email)
 	if !exsit {
 		return fmt.Errorf("此email[%s]的用户不存在", email)
 	}
@@ -122,8 +122,6 @@ func (u *User) ActiveUser(username string) error {
 		return fmt.Errorf("%s", "用户不存在")
 	}
 
-	o := orm.NewOrm()
-
 	isActive, err := u.IsActive(username)
 	if err != nil {
 		return err
@@ -136,10 +134,12 @@ func (u *User) ActiveUser(username string) error {
 		return err
 	}
 
+	o := orm.NewOrm()
+
 	var user User
 
 	qs := o.QueryTable(user)
-	_, err = qs.Filter("Name", username).Update(orm.Params{"Active": true})
+	_, err = qs.Filter("Username", username).Update(orm.Params{"Active": true})
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func (u *User) DeactiveUser(username string) error {
 	o := orm.NewOrm()
 	qs := o.QueryTable(user)
 
-	_, err = qs.Filter("Name", username).Update(orm.Params{"Active": false})
+	_, err = qs.Filter("Username", username).Update(orm.Params{"Active": false})
 	if err != nil {
 		return err
 	}
@@ -244,10 +244,10 @@ func (u *User) FindUserByUserEmail(email string) (bool, User) {
 }
 
 // SaveUser .
-func (u *User) SaveUser(user *User) int64 {
+func (u *User) SaveUser(user *User) error {
 	o := orm.NewOrm()
-	id, _ := o.Insert(user)
-	return id
+	_, err := o.Insert(user)
+	return err
 }
 
 // UpdateUser .

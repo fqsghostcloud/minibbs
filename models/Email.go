@@ -78,7 +78,7 @@ func (e *Email) CheckEmailURL(token string) (bool, string) {
 
 // GenerateAuthURL ..
 func (e *Email) GenerateAuthURL(email string) string {
-	URL := fmt.Sprintf("http://%s:8080/user/auth/?token=%s", beego.AppConfig.String("httpaddr"), e.generateEmailAuthToken(email))
+	URL := fmt.Sprintf("http://%s:8080/register/active?token=%s", beego.AppConfig.String("httpaddr"), e.generateEmailAuthToken(email))
 	// glog.Infof("generate auth url[%s] for user email[%s]", URL, email)
 	return URL
 }
