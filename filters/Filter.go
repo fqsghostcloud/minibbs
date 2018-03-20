@@ -8,13 +8,14 @@ import (
 	"github.com/astaxie/beego/context"
 )
 
+// IsLogin check user is login from cookie
 func IsLogin(ctx *context.Context) (bool, models.User) {
-	token, flag := ctx.GetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"))
+	token, exsit := ctx.GetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"))
 	user := models.User{}
-	if flag {
-		flag, user = models.UserManager.FindUserByToken(token)
+	if exsit {
+		exsit, user = models.UserManager.FindUserByToken(token)
 	}
-	return flag, user
+	return exsit, user
 }
 
 var HasPermission = func(ctx *context.Context) {

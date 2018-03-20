@@ -28,5 +28,13 @@ func main() {
 	//orm.Debug = true
 	//ok, err := regexp.MatchString("/topic/edit/[0-9]+", "/topic/edit/123")
 	//beego.Debug(ok, err)
+
+	// use glog----------------------------
+	// flag.Parse()
+	// defer glog.Flush()
+
+	// orm.Debug = true                                 // database debug model
+	beego.BConfig.WebConfig.Session.SessionOn = true // session on
 	beego.Run()
+	// glog.Flush()
 }

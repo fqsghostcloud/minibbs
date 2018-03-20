@@ -5,7 +5,7 @@
       <div class="panel-body">
         <div class="media">
           <div class="media-left">
-            <img src="{{.CurrentUserInfo.Avatar}}" class="avatar-lg" alt="{{.CurrentUserInfo.Username}}">
+            <img src="{{.CurrentUserInfo.Image}}" class="avatar-lg" alt="{{.CurrentUserInfo.Username}}">
           </div>
           <div class="media-body">
             <h3 style="margin-top: 0">{{.CurrentUserInfo.Username}}</h3>

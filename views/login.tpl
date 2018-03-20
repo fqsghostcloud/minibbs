@@ -13,7 +13,7 @@
             <label for="password">密码</label>
             <input type="password" id="password" name="password" class="form-control" placeholder="密码">
           </div>
-          <input type="submit" class="btn btn-default" value="登录"> <a href="/register">去注册</a>
+          <input type="submit" class="btn btn-default" value="登录"> <a href="/register">注册</a>
         </form>
       </div>
     </div>

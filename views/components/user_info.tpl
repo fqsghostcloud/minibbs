@@ -6,7 +6,7 @@
     <div class="media">
       <div class="media-left">
         <a href="/user/{{.UserInfo.Username}}">
-          <img src="{{.UserInfo.Avatar}}" title="{{.UserInfo.Username}}" class="avatar">
+          <img src="{{.UserInfo.Image}}" title="{{.UserInfo.Username}}" class="avatar">
         </a>
       </div>
       <div class="media-body">

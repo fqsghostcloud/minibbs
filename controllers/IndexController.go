@@ -1,13 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"minibbs/filters"
 	"minibbs/models"
 	"net/http"
 	"strconv"
 
 	"github.com/astaxie/beego"
-	"github.com/sluu99/uuid"
 )
 
 type IndexController struct {
@@ -63,37 +63,105 @@ func (c *IndexController) Login() {
 
 // RegisterPage .
 func (c *IndexController) RegisterPage() {
-	IsLogin, _ := filters.IsLogin(c.Ctx)
-	if IsLogin {
-		c.Redirect("/", 302)
-	} else {
-		beego.ReadFromRequest(&c.Controller)
-		c.Data["PageTitle"] = "注册"
-		c.Layout = "layout/layout.tpl"
-		c.TplName = "register.tpl"
+	isLogin, _ := filters.IsLogin(c.Ctx)
+
+	if isLogin {
+		c.Redirect("/", http.StatusFound)
+		return
 	}
+
+	beego.ReadFromRequest(&c.Controller)
+	c.Data["PageTitle"] = "用户注册"
+	c.Layout = "layout/layout.tpl"
+	c.TplName = "register.tpl"
+	return
+
 }
 
 // Register .
 func (c *IndexController) Register() {
 	flash := beego.NewFlash()
-	username, password := c.Input().Get("username"), c.Input().Get("password")
-	if len(username) == 0 || len(password) == 0 {
-		flash.Error("用户名或密码不能为空")
+	username, password, email := c.Input().Get("username"), c.Input().Get("password"), c.Input().Get("email")
+	if len(username) == 0 || len(password) == 0 || len(email) == 0 {
+		flash.Error("输入框不能为空")
 		flash.Store(&c.Controller)
-		c.Redirect("/register", http.StatusFound) //重定向，资源暂时性转移302
-	} else if exsit, _ := models.UserManager.FindUserByUserName(username); exsit {
+		c.Redirect("/register", http.StatusFound)
+		return
+	}
+
+	if exsit, _ := models.UserManager.FindUserByUserName(username); exsit {
 		flash.Error("用户名已被注册")
 		flash.Store(&c.Controller)
 		c.Redirect("/register", http.StatusFound)
-	} else {
-		var token = uuid.Rand().Hex()
-		user := models.User{Username: username, Password: password, Image: "/static/imgs/avatar.png", Token: token}
-		models.UserManager.SaveUser(&user)
-		// others are ordered as cookie's max age time, path,domain, secure and httponly.
-		c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), token, 30*24*60*60, "/", beego.AppConfig.String("cookie.domain"), false, true)
-		c.Redirect("/", http.StatusFound)
+		return
 	}
+
+	// if exsit, _ := models.UserManager.FindUserByUserEmail(email); exsit {
+	// 	flash.Error("邮箱已被注册")
+	// 	flash.Store(&c.Controller)
+	// 	c.Redirect("/register", http.StatusFound)
+	// 	return
+	// }
+
+	authURL := models.EmailManager.GenerateAuthURL(email)
+	models.EmailManager.SetTheme("用户帐号激活") //设置主题
+	models.EmailManager.SetEmailContent(authURL)
+
+	err := models.EmailManager.InitSendCfg(email, username)
+	if err != nil {
+		flash.Error("发送注册邮件初始化时发生错误，请联系管理员")
+		flash.Store(&c.Controller)
+		c.Redirect("/register", http.StatusFound)
+		return
+	}
+
+	err = models.EmailManager.SendEmail()
+	if err != nil {
+		flash.Error("发送注册邮件时发生错误，请联系管理员")
+		flash.Store(&c.Controller)
+		c.Redirect("/register", http.StatusFound)
+		return
+	}
+
+	user := models.User{
+		Username: username,
+		Password: password,
+		Email:    email,
+		Image:    "/static/imgs/default.png",
+	}
+
+	models.UserManager.SaveUser(&user)
+
+	flash.Success("注册验证邮件已经发送到您的邮箱，请激活后再登录")
+	flash.Store(&c.Controller)
+	c.Redirect("/register", http.StatusFound)
+	return
+}
+
+// ActiveAccount activation user account by check email
+func (c *IndexController) ActiveAccount() {
+	flash := beego.NewFlash()
+	token := c.GetString("token")
+	fmt.Println("token: " + token)
+
+	if models.EmailManager != nil {
+		isAccess, email := models.EmailManager.CheckEmailURL(token)
+
+		if isAccess {
+			err := models.UserManager.ActiveAccount(email)
+			if err != nil {
+				// glog.Errorf("active user by email error[%s]\n", err.Error())
+				flash.Error("激活账户时发生错误，请联系管理员")
+				return
+			}
+		}
+
+		flash.Success("激活账户成功")
+		return
+	}
+
+	flash.Error("发送注册邮件时发生错误，请联系管理员")
+	return
 }
 
 // Logout .

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"minibbs/utils"
 	"strconv"
 	"time"
@@ -11,10 +12,18 @@ import (
 // API user api
 type API interface {
 	Login(username string, password string) (bool, User)
+	IsActive(username string) (bool, error)
 
+	ActiveUserByEmail(email string) error
+	ActiveAccount(email string) error
+	ActiveUser(username string) error
+	DeactiveUser(username string) error
+
+	ExsitUser(username string) bool
 	FindUserByID(id int) (bool, User)
 	FindUserByToken(token string) (bool, User)
 	FindUserByUserName(username string) (bool, User)
+	FindUserByUserEmail(email string) (bool, User)
 	FindPermissionByUser(id int) []*Permission
 	FindUserRolesByUserID(userID int) []orm.Params
 
@@ -39,6 +48,8 @@ type User struct {
 	Signature string    `orm:"null;size(1000)"`
 	InTime    time.Time `orm:"auto_now_add;type(datetime)"`
 	Roles     []*Role   `orm:"rel(m2m)"`
+	Active    bool      `orm:"default(false)"`
+	Status    bool      `orm:"default(false)"`
 }
 
 // UserManager manager user api
@@ -46,6 +57,138 @@ var UserManager API
 
 func init() {
 	UserManager = new(User)
+}
+
+// ActiveAccount .
+func (u *User) ActiveAccount(email string) error {
+	return u.ActiveUserByEmail(email)
+}
+
+// ExsitUser check user whether exsit
+func (u *User) ExsitUser(username string) bool {
+	o := orm.NewOrm()
+	var user User
+	qs := o.QueryTable(user)
+	return qs.Filter("Username", username).Exist()
+}
+
+// IsActive check user whether activve
+func (u *User) IsActive(username string) (bool, error) {
+	var user User
+	o := orm.NewOrm()
+	qs := o.QueryTable(user)
+	err := qs.Filter("Username", username).One(&user)
+
+	if err != nil {
+		return false, err
+	}
+
+	return user.Active == true, nil
+}
+
+// GetUserByEmail ..
+func (u *User) GetUserByEmail(email string) (string, error) {
+	o := orm.NewOrm()
+
+	var user User
+	qs := o.QueryTable(user)
+	err := qs.Filter("Email", email).One(&user)
+	if err != nil {
+		return "", err
+	}
+
+	return user.Username, nil
+
+}
+
+// ActiveUserByEmail ..
+func (u *User) ActiveUserByEmail(email string) error {
+	exsit, user := u.FindUserByUserName(email)
+	if !exsit {
+		return fmt.Errorf("此email[%s]的用户不存在", email)
+	}
+
+	err := u.ActiveUser(user.Username)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ActiveUser active user
+func (u *User) ActiveUser(username string) error {
+	if !u.ExsitUser(username) {
+		return fmt.Errorf("%s", "用户不存在")
+	}
+
+	o := orm.NewOrm()
+
+	isActive, err := u.IsActive(username)
+	if err != nil {
+		return err
+	}
+
+	if isActive {
+		err := fmt.Errorf("user[%s] already active", username)
+		// glog.Infof(err.Error())
+
+		return err
+	}
+
+	var user User
+
+	qs := o.QueryTable(user)
+	_, err = qs.Filter("Name", username).Update(orm.Params{"Active": true})
+	if err != nil {
+		return err
+	}
+	// glog.Infof("active user[%s] success\n", username)
+
+	return nil
+}
+
+// InactiveUserByEmail ..
+func (u *User) InactiveUserByEmail(email string) error {
+	username, err := u.GetUserByEmail(email)
+	if err != nil {
+		return err
+	}
+
+	err = u.DeactiveUser(username)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeactiveUser inactive user
+func (u *User) DeactiveUser(username string) error {
+	if !u.ExsitUser(username) {
+		return fmt.Errorf("%s", "用户不存在")
+	}
+
+	isActive, err := u.IsActive(username)
+	if err != nil {
+		return err
+	}
+
+	if !isActive {
+		err := fmt.Errorf("user[%s] already inactive", username)
+		return err
+	}
+
+	var user User
+	o := orm.NewOrm()
+	qs := o.QueryTable(user)
+
+	_, err = qs.Filter("Name", username).Update(orm.Params{"Active": false})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // FindPermissionByUserIDAndPermissionName .
@@ -89,6 +232,14 @@ func (u *User) FindUserByUserName(username string) (bool, User) {
 	o := orm.NewOrm()
 	var user User
 	err := o.QueryTable(user).Filter("Username", username).One(&user)
+	return err != orm.ErrNoRows, user
+}
+
+// FindUserByUserEmail .
+func (u *User) FindUserByUserEmail(email string) (bool, User) {
+	o := orm.NewOrm()
+	var user User
+	err := o.QueryTable(user).Filter("Email", email).One(&user)
 	return err != orm.ErrNoRows, user
 }
 

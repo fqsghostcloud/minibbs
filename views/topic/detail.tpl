@@ -26,7 +26,7 @@
             </p>
           </div>
           <div class="media-right">
-            <img src="{{.Topic.User.Avatar}}" alt="{{.Topic.User.Username}}" class="avatar-lg">
+            <img src="{{.Topic.User.Image}}" alt="{{.Topic.User.Username}}" class="avatar-lg">
           </div>
         </div>
       </div>
@@ -46,7 +46,7 @@
         {{range .Replies}}
         <div class="media">
           <div class="media-left">
-            <a href="/user/{{.User.Username}}"><img src="{{.User.Avatar}}" class="avatar" alt="{{.User.Username}}"></a>
+            <a href="/user/{{.User.Username}}"><img src="{{.User.Image}}" class="avatar" alt="{{.User.Username}}"></a>
           </div>
           <div class="media-body reply-content">
             <div class="media-heading gray">
