@@ -10,10 +10,10 @@
           <form action="/permission/add" method="post">
             <div class="form-group">
               <label for="pid">父节点</label>
-              <select name="pid" ID="pid" class="form-control">
+              <select name="pid" Id="pid" class="form-control">
                 <option value="0">添加父节点</option>
                 {{range .ParantPermissions}}
-                <option value="{{.ID}}">
+                <option value="{{.Id}}">
                   {{.Description}}
                 </option>
                 {{end}}
@@ -21,15 +21,15 @@
             </div>
             <div class="form-group">
               <label for="name">权限标识</label>
-              <input type="text" ID="name" name="name" class="form-control" placeholder="权限标识">
+              <input type="text" Id="name" name="name" class="form-control" placeholder="权限标识">
             </div>
             <div class="form-group">
               <label for="url">授权地址</label>
-              <input type="text" ID="url" name="url" class="form-control" placeholder="授权地址">
+              <input type="text" Id="url" name="url" class="form-control" placeholder="授权地址">
             </div>
             <div class="form-group">
               <label for="description">权限描述</label>
-              <input type="text" ID="description" name="description" class="form-control" placeholder="权限描述">
+              <input type="text" Id="description" name="description" class="form-control" placeholder="权限描述">
             </div>
             <button type="submit" class="btn btn-default btn-sm">保存</button>
           </form>

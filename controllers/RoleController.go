@@ -81,7 +81,7 @@ func (c *RoleController) Update() {
 		flash.Store(&c.Controller)
 		c.Redirect("/role/add", 302)
 	} else {
-		role := models.Role{ID: id, Name: name}
+		role := models.Role{Id: id, Name: name}
 		models.RoleManager.UpdateRole(&role)
 		models.RoleManager.DeleteRolePermissionByRoleId(id)
 		for _, pid := range permissionIds {
@@ -95,7 +95,7 @@ func (c *RoleController) Update() {
 func (c *RoleController) Delete() {
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
-		role := models.Role{ID: id}
+		role := models.Role{Id: id}
 		models.RoleManager.DeleteRole(&role)
 		c.Redirect("/role/list", 302)
 	} else {

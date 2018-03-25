@@ -23,7 +23,7 @@ type TopicAPI interface {
 }
 
 type Topic struct {
-	ID            int       `orm:"pk;auto"`
+	Id            int       `orm:"pk;auto"`
 	Title         string    `orm:"unique"`
 	Content       string    `orm:"type(text);null"`
 	InTime        time.Time `orm:"auto_now_add;type(datetime)"`
@@ -114,5 +114,5 @@ func (t *Topic) DeleteTopic(topic *Topic) {
 // DeleteTopicByUser .
 func (t *Topic) DeleteTopicByUser(user *User) {
 	o := orm.NewOrm()
-	o.Raw("delete from topic where user_id = ?", user.ID).Exec()
+	o.Raw("delete from topic where user_id = ?", user.Id).Exec()
 }

@@ -3,7 +3,7 @@ package models
 import "github.com/astaxie/beego/orm"
 
 type Role struct {
-	ID          int           `orm:"pk;auto"`
+	Id          int           `orm:"pk;auto"`
 	Name        string        `orm:"unique"`
 	Users       []*User       `orm:"reverse(many)"`
 	Permissions []*Permission `orm:"rel(m2m)"`

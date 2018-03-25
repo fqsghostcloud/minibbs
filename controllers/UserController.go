@@ -56,7 +56,7 @@ func (c *UserController) Setting() {
 	}
 	_, user := filters.IsLogin(c.Ctx)
 	user.Email = email
-	user.URL = url
+	user.Url = url
 	user.Signature = signature
 	models.UserManager.UpdateUser(&user)
 	flash.Success("更新资料成功")

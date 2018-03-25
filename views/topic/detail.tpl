@@ -14,14 +14,14 @@
               <span>•</span>
               <span>{{.Topic.View}}次点击</span>
               <span>•</span>
-              <span>来自 <a href="/?s={{.Topic.Section.ID}}">{{.Topic.Section.Name}}</a></span>
-              {{if haspermission .UserInfo.ID "topic:edit"}}
+              <span>来自 <a href="/?s={{.Topic.Section.Id}}">{{.Topic.Section.Name}}</a></span>
+              {{if haspermission .UserInfo.Id "topic:edit"}}
                 <span>•</span>
-                <span><a href="/topic/edit/{{.Topic.ID}}">编辑</a></span>
+                <span><a href="/topic/edit/{{.Topic.Id}}">编辑</a></span>
               {{end}}
-              {{if haspermission .UserInfo.ID "topic:delete"}}
+              {{if haspermission .UserInfo.Id "topic:delete"}}
                 <span>•</span>
-                <span><a href="javascript:if(confirm('确定删除吗?')) location.href='/topic/delete/{{.Topic.ID}}'">删除</a></span>
+                <span><a href="javascript:if(confirm('确定删除吗?')) location.href='/topic/delete/{{.Topic.Id}}'">删除</a></span>
               {{end}}
             </p>
           </div>
@@ -53,9 +53,9 @@
               <a href="/user/{{.User.Username}}">{{.User.Username}} </a>
               <span>{{.InTime | timeago}}</span>
               <span class="pull-right">
-                {{if haspermission $.UserInfo.ID "reply:delete"}}<a href="javascript:if(confirm('确定删除吗?')) location.href='/reply/delete/{{.ID}}'">删除</a>{{end}}
-                {{if $.IsLogin}}<a href="javascript:up('{{.ID}}');"><span class="glyphicon glyphicon-thumbs-up"></span></a>{{end}}
-                <span ID="up_{{.ID}}">{{.Up}}赞</span>
+                {{if haspermission $.UserInfo.Id "reply:delete"}}<a href="javascript:if(confirm('确定删除吗?')) location.href='/reply/delete/{{.Id}}'">删除</a>{{end}}
+                {{if $.IsLogin}}<a href="javascript:up('{{.Id}}');"><span class="glyphicon glyphicon-thumbs-up"></span></a>{{end}}
+                <span Id="up_{{.Id}}">{{.Up}}赞</span>
               </span>
             </div>
             {{str2html (.Content | markdown)}}
@@ -73,7 +73,7 @@
       </div>
       <div class="panel-body">
         <form action="/reply/save" method="post">
-          <input type="hidden" value="{{.Topic.ID}}" name="tid">
+          <input type="hidden" value="{{.Topic.Id}}" name="tid">
           <div class="form-group">
             <textarea name="content" rows="5" class="form-control" placeholder="支持Markdown语法哦~"></textarea>
           </div>
@@ -88,7 +88,7 @@
   </div>
 </div>
 <script type="text/javascript">
-  function up(ID) {
+  function up(Id) {
     var isLogin = {{.IsLogin}};
     if(isLogin) {
       $.ajax({
@@ -97,10 +97,10 @@
         cache: false,
         type: "get",
         dataType: "json",
-        data: {rid: ID},
+        data: {rid: Id},
         success: function (data) {
           if(data.Code == 200) {
-            var upele = $("#up_" + ID);
+            var upele = $("#up_" + Id);
             upele.text(parseInt(upele.text()) + 1);
           } else {
             alert(data.Description)

@@ -38,13 +38,13 @@ type API interface {
 
 // User ..
 type User struct {
-	ID        int    `orm:"pk;auto"`
+	Id        int    `orm:"pk;auto"`
 	Username  string `orm:"unique"`
 	Password  string
 	Token     string `orm:"unique"`
 	Image     string
 	Email     string    `orm:"null"`
-	URL       string    `orm:"null"`
+	Url       string    `orm:"null"`
 	Signature string    `orm:"null;size(1000)"`
 	InTime    time.Time `orm:"auto_now_add;type(datetime)"`
 	Roles     []*Role   `orm:"rel(m2m)"`
@@ -197,9 +197,9 @@ func FindPermissionByUserIDAndPermissionName(userID int, name string) bool {
 }
 
 // FindUserByID .
-func (u *User) FindUserByID(ID int) (bool, User) {
+func (u *User) FindUserByID(Id int) (bool, User) {
 	o := orm.NewOrm()
-	err := o.QueryTable(*u).Filter("Id", ID).One(u)
+	err := o.QueryTable(*u).Filter("Id", Id).One(u)
 	return err != orm.ErrNoRows, *u
 }
 
@@ -270,7 +270,7 @@ func (u *User) PageUser(p int, size int) utils.Page {
 }
 
 // FindPermissionByUser .
-func (u *User) FindPermissionByUser(ID int) []*Permission {
+func (u *User) FindPermissionByUser(Id int) []*Permission {
 	o := orm.NewOrm()
 	var permissions []*Permission
 	o.Raw("select p.* from permission p "+
@@ -278,7 +278,7 @@ func (u *User) FindPermissionByUser(ID int) []*Permission {
 		"left join role r on rp.role_id = r.id "+
 		"left join user_roles ur on r.id = ur.role_id "+
 		"left join user u on ur.user_id = u.id "+
-		"where u.id = ?", ID).QueryRows(&permissions)
+		"where u.id = ?", Id).QueryRows(&permissions)
 	return permissions
 }
 

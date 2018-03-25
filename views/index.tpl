@@ -17,7 +17,7 @@
           </div>
           <div class="media-body">
             <div class="title">
-              <a href="/topic/{{.ID}}">{{.Title}}</a>
+              <a href="/topic/{{.Id}}">{{.Title}}</a>
             </div>
             <p class="gray">
               <span class="label label-primary">{{.Section.Name}}</span>

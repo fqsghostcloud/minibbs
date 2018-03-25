@@ -83,5 +83,5 @@ func (r *Reply) DeleteReply(reply *Reply) {
 
 func (r *Reply) DeleteReplyByUser(user *User) {
 	o := orm.NewOrm()
-	o.Raw("delete form reply where user_id = ?", user.ID).Exec()
+	o.Raw("delete form reply where user_id = ?", user.Id).Exec()
 }

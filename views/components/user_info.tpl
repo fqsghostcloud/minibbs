@@ -13,7 +13,7 @@
         <div class="media-heading">
           <a href="/user/{{.UserInfo.Username}}">{{.UserInfo.Username}}</a>
         </div>
-        {{if .UserInfo.URL}}<a href="{{.UserInfo.URL}}" target="_blank">{{.UserInfo.URL}}</a>{{end}}
+        {{if .UserInfo.Url}}<a href="{{.UserInfo.Url}}" target="_blank">{{.UserInfo.Url}}</a>{{end}}
       </div>
       {{if .UserInfo.Signature}}
       <div style="color: #7A7A7A; font-size: 12px; margin-top:5px;">

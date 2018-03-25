@@ -23,7 +23,7 @@ var HasPermission = func(ctx *context.Context) {
 	if !ok {
 		ctx.Redirect(302, "/login")
 	} else {
-		permissions := models.UserManager.FindPermissionByUser(user.ID)
+		permissions := models.UserManager.FindPermissionByUser(user.Id)
 		url := ctx.Request.RequestURI
 		beego.Debug("url: ", url)
 		var flag = false

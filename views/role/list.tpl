@@ -10,11 +10,11 @@
           <tbody>
           {{range .Roles}}
           <tr>
-            <td>{{.ID}}</td>
+            <td>{{.Id}}</td>
             <td>{{.Name}}</td>
             <td>
-              <a href="/role/edit/{{.ID}}" class="btn btn-xs btn-warning">配置权限</a>
-              <a href="javascript:if(confirm('确认删除吗?')) location.href='/role/delete/{{.ID}}'" class="btn btn-xs btn-danger">删除</a>
+              <a href="/role/edit/{{.Id}}" class="btn btn-xs btn-warning">配置权限</a>
+              <a href="javascript:if(confirm('确认删除吗?')) location.href='/role/delete/{{.Id}}'" class="btn btn-xs btn-danger">删除</a>
             </td>
           </tr>
           {{end}}

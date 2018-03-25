@@ -60,7 +60,7 @@ func (c *ReplyController) Delete() {
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
 		reply := models.ReplyManager.FindReplyById(id)
-		tid := reply.Topic.ID
+		tid := reply.Topic.Id
 		models.TopicManager.ReduceReplyCount(reply.Topic)
 		models.ReplyManager.DeleteReply(&reply)
 		c.Redirect("/topic/"+strconv.Itoa(tid), 302)
