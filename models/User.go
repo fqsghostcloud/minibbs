@@ -43,13 +43,14 @@ type User struct {
 	Password  string
 	Token     string `orm:"unique"`
 	Image     string
-	Email     string    `orm:"null"`
+	Email     string 
 	Url       string    `orm:"null"`
 	Signature string    `orm:"null;size(1000)"`
 	InTime    time.Time `orm:"auto_now_add;type(datetime)"`
 	Roles     []*Role   `orm:"rel(m2m)"`
 	Active    bool      `orm:"default(false)"`
 	Status    bool      `orm:"default(false)"`
+	LastTime string `orm:"type(datetime)"` // last time to login
 }
 
 // UserManager manager user api

@@ -9,10 +9,13 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"fmt"
 )
 
 func init() {
-	orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("jdbc.username")+":"+beego.AppConfig.String("jdbc.password")+"@tcp(localhost)/pybbsgo?charset=utf8&parseTime=true&charset=utf8&loc=Asia%2FShanghai", 30)
+	orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("db.username")+":"+
+	beego.AppConfig.String("db.password")+fmt.Sprintf("@tcp(%s)/%s",beego.AppConfig.String("db.ip"), beego.AppConfig.String("db.name"))+
+	"?charset=utf8&parseTime=true&charset=utf8&loc=Asia%2FShanghai", 30)
 	orm.RegisterModel(
 		new(models.User),
 		new(models.Topic),
@@ -33,7 +36,7 @@ func main() {
 	// flag.Parse()
 	// defer glog.Flush()
 
-	// orm.Debug = true                                 // database debug model
+	orm.Debug = true                                 // database debug model
 	beego.BConfig.WebConfig.Session.SessionOn = true // session on
 	beego.Run()
 	// glog.Flush()

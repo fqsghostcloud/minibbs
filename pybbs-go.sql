@@ -1,7 +1,6 @@
 
 
 LOCK TABLES `permission` WRITE;
-/*!40000 ALTER TABLE `permission` DISABLE KEYS */;
 
 INSERT INTO `permission` (`id`, `pid`, `name`, `description`, `url`)
 VALUES
@@ -26,26 +25,21 @@ VALUES
 	(23,12,'permission:edit','编辑权限','/permission/edit/[0-9]+'),
 	(24,12,'permission:delete','删除权限','/permission/delete/[0-9]+');
 
-/*!40000 ALTER TABLE `permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
-# Dump of table reply
-# ------------------------------------------------------------
+
 
 LOCK TABLES `reply` WRITE;
-/*!40000 ALTER TABLE `reply` DISABLE KEYS */;
 
 INSERT INTO `reply` (`id`, `topic_id`, `content`, `user_id`, `up`, `in_time`)
 VALUES
 	(1,1,'分享世界',1,0,'2016-08-26 09:22:52');
 
-/*!40000 ALTER TABLE `reply` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
 LOCK TABLES `role` WRITE;
-/*!40000 ALTER TABLE `role` DISABLE KEYS */;
 
 INSERT INTO `role` (`id`, `name`)
 VALUES
@@ -53,15 +47,12 @@ VALUES
 	(4,'版主'),
 	(5,'普通用户');
 
-/*!40000 ALTER TABLE `role` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
-# Dump of table role_permissions
-# ------------------------------------------------------------
+
 
 LOCK TABLES `role_permissions` WRITE;
-/*!40000 ALTER TABLE `role_permissions` DISABLE KEYS */;
 
 INSERT INTO `role_permissions` (`id`, `role_id`, `permission_id`)
 VALUES
@@ -89,73 +80,46 @@ VALUES
 	(79,3,23),
 	(80,3,24);
 
-/*!40000 ALTER TABLE `role_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
-# Dump of table section
-# ------------------------------------------------------------
-
 LOCK TABLES `section` WRITE;
-/*!40000 ALTER TABLE `section` DISABLE KEYS */;
 
 INSERT INTO `section` (`id`, `name`)
 VALUES
 	(1,'分享'),
 	(3,'博客'),
-	(4,'招聘'),
 	(2,'问答');
 
-/*!40000 ALTER TABLE `section` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
-# Dump of table topic
-# ------------------------------------------------------------
 
 LOCK TABLES `topic` WRITE;
-/*!40000 ALTER TABLE `topic` DISABLE KEYS */;
 
 INSERT INTO `topic` (`id`, `title`, `content`, `in_time`, `user_id`, `section_id`, `view`, `reply_count`, `last_reply_user_id`, `last_reply_time`)
 VALUES
 	(1,'测试话题 ，hello world','你好，世界','2016-08-26 09:22:42',1,1,15,1,NULL,'2016-08-26 09:22:42');
 
-/*!40000 ALTER TABLE `topic` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
-# Dump of table user
-# ------------------------------------------------------------
 
 LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
 
-INSERT INTO `user` (`id`, `username`, `password`, `token`, `avatar`, `email`, `url`, `signature`, `in_time`)
+INSERT INTO `user` (`id`, `username`, `password`, `token`, `image`, `email`, `url`, `signature`, `in_time`, `last_time`)
 VALUES
-	(1,'root','123456','fcd1cb8e-b71f-46c3-9974-7225997b40c7','/static/imgs/avatar.png','','https://tomoya.cn','这家伙很懒，什么都没留下~','2016-08-26 09:22:16');
+	(1,'root','123456','fcd1cb8e-b71f-46c3-9974-7225997b40c7','/static/imgs/default.png','1178996513@qq.com','https://minibbs.com','个人介绍','2016-08-26 09:22:16','1970-01-01 00:00:00');
 
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
-# Dump of table user_roles
-# ------------------------------------------------------------
+
 
 LOCK TABLES `user_roles` WRITE;
-/*!40000 ALTER TABLE `user_roles` DISABLE KEYS */;
 
 INSERT INTO `user_roles` (`id`, `user_id`, `role_id`)
 VALUES
 	(5,1,3);
 
-/*!40000 ALTER TABLE `user_roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
-
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
