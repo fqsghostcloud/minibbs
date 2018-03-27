@@ -16,27 +16,32 @@ func (c *TopicController) Create() {
 	beego.ReadFromRequest(&c.Controller)
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 	c.Data["PageTitle"] = "发布话题"
-	c.Data["Sections"] = models.FindAllSection()
+	c.Data["Tags"] = models.FindAllTag()
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "topic/create.tpl"
 }
 
 func (c *TopicController) Save() {
 	flash := beego.NewFlash()
-	title, content, sid := c.Input().Get("title"), c.Input().Get("content"), c.Input().Get("sid")
+	title, content := c.Input().Get("title"), c.Input().Get("content")
+	tids := c.GetStrings("tids")
 	if len(title) == 0 || len(title) > 120 {
 		flash.Error("话题标题不能为空且不能超过120个字符")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/create", 302)
-	} else if len(sid) == 0 {
-		flash.Error("请选择话题版块")
+	} else if len(tids) == 0 {
+		flash.Error("请选择话题标签")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/create", 302)
 	} else {
-		s, _ := strconv.Atoi(sid)
-		section := models.Section{Id: s}
+		var tags []*models.Tag
+		for _, strid := range tids {
+			id, _ := strconv.Atoi(strid)
+			tags = append(tags, &models.Tag{Id: id})
+		}
+
 		_, user := filters.IsLogin(c.Ctx)
-		topic := models.Topic{Title: title, Content: content, Section: &section, User: &user}
+		topic := models.Topic{Title: title, Content: content, Tags: tags, User: &user}
 		id := models.TopicManager.SaveTopic(&topic)
 		c.Redirect("/topic/"+strconv.FormatInt(id, 10), 302)
 	}
@@ -66,7 +71,7 @@ func (c *TopicController) Edit() {
 		topic := models.TopicManager.FindTopicById(id)
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 		c.Data["PageTitle"] = "编辑话题"
-		c.Data["Sections"] = models.FindAllSection()
+		c.Data["Tags"] = models.FindAllTag()
 		c.Data["Topic"] = topic
 		c.Layout = "layout/layout.tpl"
 		c.TplName = "topic/edit.tpl"
@@ -89,11 +94,11 @@ func (c *TopicController) Update() {
 		c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
 	} else {
 		s, _ := strconv.Atoi(sid)
-		section := models.Section{Id: s}
+		tag := models.Tag{Id: s}
 		topic := models.TopicManager.FindTopicById(id)
 		topic.Title = title
 		topic.Content = content
-		topic.Section = &section
+		topic.Tags = append(topic.Tags, &tag)
 		models.TopicManager.UpdateTopic(&topic)
 		c.Redirect("/topic/"+strconv.Itoa(id), 302)
 	}

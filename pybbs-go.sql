@@ -83,28 +83,17 @@ VALUES
 UNLOCK TABLES;
 
 
-LOCK TABLES `section` WRITE;
+LOCK TABLES `tag` WRITE;
 
-INSERT INTO `section` (`id`, `name`)
+INSERT INTO `tag` (`id`, `name`)
 VALUES
-	(1,'分享'),
-	(3,'博客'),
-	(2,'问答');
+	(1,'docker'),
+	(3,'golang'),
+	(2,'kubernetes');
 
 UNLOCK TABLES;
 
 
-
-LOCK TABLES `topic` WRITE;
-
-INSERT INTO `topic` (`id`, `title`, `content`, `in_time`, `user_id`, `section_id`, `view`, `reply_count`, `last_reply_user_id`, `last_reply_time`)
-VALUES
-	(1,'测试话题 ，hello world','你好，世界','2016-08-26 09:22:42',1,1,15,1,NULL,'2016-08-26 09:22:42');
-
-UNLOCK TABLES;
-
-
-LOCK TABLES `user` WRITE;
 
 INSERT INTO `user` (`id`, `username`, `password`, `token`, `image`, `email`, `url`, `signature`, `in_time`, `last_time`)
 VALUES

@@ -12,7 +12,7 @@ import (
 type TopicAPI interface {
 	SaveTopic(topic *Topic) int64
 	FindTopicById(id int) Topic
-	PageTopic(p int, size int, section *Section) utils.Page
+	PageTopic(p int, size int, tag *Tag) utils.Page
 	IncrView(topic *Topic)
 	IncrReplyCount(topic *Topic)
 	ReduceReplyCount(topic *Topic)
@@ -28,11 +28,11 @@ type Topic struct {
 	Content       string    `orm:"type(text);null"`
 	InTime        time.Time `orm:"auto_now_add;type(datetime)"`
 	User          *User     `orm:"rel(fk)"`
-	Section       *Section  `orm:"rel(fk)"`
 	View          int       `orm:"default(0)"`
 	ReplyCount    int       `orm:"default(0)"`
 	LastReplyUser *User     `orm:"rel(fk);null"`
 	LastReplyTime time.Time `orm:"auto_now_add;type(datetime)"`
+	Tags          []*Tag    `orm:"rel(m2m)"`
 }
 
 // TopicManager manager topic api
@@ -58,13 +58,13 @@ func (t *Topic) FindTopicById(id int) Topic {
 }
 
 // PageTopic .
-func (t *Topic) PageTopic(p int, size int, section *Section) utils.Page {
+func (t *Topic) PageTopic(p int, size int, tag *Tag) utils.Page {
 	o := orm.NewOrm()
 	var topic Topic
 	var list []Topic
 	qs := o.QueryTable(topic)
-	if section.Id > 0 {
-		qs = qs.Filter("Section", section)
+	if tag.Id > 0 {
+		qs = qs.Filter("Tag", tag)
 	}
 	count, _ := qs.Limit(-1).Count()
 	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)

@@ -18,7 +18,7 @@
           <div class="form-group">
             <label for="title">版块</label>
             <select name="sid" Id="sid" class="form-control">
-              {{range .Sections}}
+              {{range .Tags}}
                 <option value="{{.Id}}">{{.Name}}</option>
               {{end}}
             </select>
@@ -31,6 +31,6 @@
 </div>
 <script type="text/javascript">
   $(function () {
-    $("#sid").val('{{.Topic.Section.Id}}')
+    $("#sid").val('{{.Topic.Tag.Id}}')
   });
 </script>

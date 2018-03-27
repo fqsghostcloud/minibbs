@@ -17,8 +17,8 @@
           </div>
           <div class="form-group">
             <label for="title">版块</label>
-            <select name="sid" Id="sid" class="form-control">
-              {{range .Sections}}
+            <select name="tids" Id="tids" class="form-control">
+              {{range .Tags}}
                 <option value="{{.Id}}">{{.Name}}</option>
               {{end}}
             </select>

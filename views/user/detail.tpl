@@ -28,7 +28,7 @@
               <a href="/topic/{{.Id}}">{{.Title}}</a>
             </div>
             <p>
-              <a href="/?tab={{.Section.Id}}">{{.Section.Name}}</a>
+              <a href="/?tab={{.Tag.Id}}">{{.Tag.Name}}</a>
               <span>•</span>
               <span><a href="/user/{{.User.Username}}">{{.User.Username}}</a></span>
               <span class="hidden-sm hidden-xs">•</span>

@@ -6,20 +6,21 @@ import (
 	_ "minibbs/templates"
 	_ "minibbs/utils"
 
+	"fmt"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
-	"fmt"
 )
 
 func init() {
 	orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("db.username")+":"+
-	beego.AppConfig.String("db.password")+fmt.Sprintf("@tcp(%s)/%s",beego.AppConfig.String("db.ip"), beego.AppConfig.String("db.name"))+
-	"?charset=utf8&parseTime=true&charset=utf8&loc=Asia%2FShanghai", 30)
+		beego.AppConfig.String("db.password")+fmt.Sprintf("@tcp(%s)/%s", beego.AppConfig.String("db.ip"), beego.AppConfig.String("db.name"))+
+		"?charset=utf8&parseTime=true&charset=utf8&loc=Asia%2FShanghai", 30)
 	orm.RegisterModel(
 		new(models.User),
 		new(models.Topic),
-		new(models.Section),
+		new(models.Tag),
 		new(models.Reply),
 		new(models.ReplyUpLog),
 		new(models.Role),
@@ -36,7 +37,7 @@ func main() {
 	// flag.Parse()
 	// defer glog.Flush()
 
-	orm.Debug = true                                 // database debug model
+	// orm.Debug = true                                 // database debug model
 	beego.BConfig.WebConfig.Session.SessionOn = true // session on
 	beego.Run()
 	// glog.Flush()

@@ -6,7 +6,7 @@
           <div class="media-body">
             <h2 class="topic-detail-title">{{.Topic.Title}}</h2>
             <p class="gray">
-              <span class="label label-primary">{{.Topic.Section.Name}}</span>
+              <span class="label label-primary">bug</span>
               <span>•</span>
               <span><a href="/user/{{.Topic.User.Username}}">{{.Topic.User.Username}}</a></span>
               <span>•</span>
@@ -14,7 +14,7 @@
               <span>•</span>
               <span>{{.Topic.View}}次点击</span>
               <span>•</span>
-              <span>来自 <a href="/?s={{.Topic.Section.Id}}">{{.Topic.Section.Name}}</a></span>
+              <span>来自 <a href="/?s={{.Topic.Tag.Id}}">bug</a></span>
               {{if haspermission .UserInfo.Id "topic:edit"}}
                 <span>•</span>
                 <span><a href="/topic/edit/{{.Topic.Id}}">编辑</a></span>

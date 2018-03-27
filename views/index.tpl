@@ -4,7 +4,7 @@
       <div class="panel-heading">
         <ul class="nav nav-pills">
           <li id="tab_0"><a href="/?tab=all">全部</a></li>
-          {{range .Sections}}
+          {{range .Tags}}
           <li id="tab_{{.Id}}"><a href="/?s={{.Id}}">{{.Name}}</a></li>
           {{end}}
         </ul>
@@ -20,7 +20,7 @@
               <a href="/topic/{{.Id}}">{{.Title}}</a>
             </div>
             <p class="gray">
-              <span class="label label-primary">{{.Section.Name}}</span>
+              <span class="label label-primary">fix-bug</span>
               <span>•</span>
               <span><a href="/user/{{.User.Username}}">{{.User.Username}}</a></span>
               <span class="hidden-sm hidden-xs">•</span>
