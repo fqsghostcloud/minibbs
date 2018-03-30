@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"minibbs/models"
 	"regexp"
 
@@ -24,6 +25,7 @@ var HasPermission = func(ctx *context.Context) {
 		ctx.Redirect(302, "/login")
 	} else {
 		permissions := models.UserManager.FindPermissionByUser(user.Id)
+		fmt.Printf("permission{%v}\n", permissions)
 		url := ctx.Request.RequestURI
 		beego.Debug("url: ", url)
 		var flag = false

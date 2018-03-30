@@ -98,6 +98,16 @@ func (c *IndexController) Register() {
 		return
 	}
 
+	var token = uuid.Rand().Hex() // token 唯一
+
+	user := models.User{
+		Username: username,
+		Password: password,
+		Email:    email,
+		Token:    token,
+		Image:    "/static/imgs/default.png",
+	}
+
 	if exsit, _ := models.UserManager.FindUserByUserName(username); exsit {
 		flash.Error("用户名已被注册")
 		flash.Store(&c.Controller)
@@ -112,37 +122,31 @@ func (c *IndexController) Register() {
 		return
 	}
 
-	authURL := models.EmailManager.GenerateAuthURL(email)
-	fmt.Printf("\n%s\n", authURL)
-	models.EmailManager.SetTheme("用户帐号激活") //设置主题
-	models.EmailManager.SetEmailContent(authURL)
+	if isEmailRegist, _ := beego.AppConfig.Bool("emailRegist"); isEmailRegist {
+		authURL := models.EmailManager.GenerateAuthURL(email)
+		fmt.Printf("\n%s\n", authURL)
+		models.EmailManager.SetTheme("用户帐号激活") //设置主题
+		models.EmailManager.SetEmailContent(authURL)
 
-	err := models.EmailManager.InitSendCfg(email, username)
-	if err != nil {
-		fmt.Printf("send email init error[%s]", err.Error())
-		flash.Error("发送注册邮件初始化时发生错误，请联系管理员")
-		flash.Store(&c.Controller)
-		c.Redirect("/register", http.StatusFound)
-		return
-	}
+		err := models.EmailManager.InitSendCfg(email, username)
+		if err != nil {
+			fmt.Printf("send email init error[%s]", err.Error())
+			flash.Error("发送注册邮件初始化时发生错误，请联系管理员")
+			flash.Store(&c.Controller)
+			c.Redirect("/register", http.StatusFound)
+			return
+		}
 
-	err = models.EmailManager.SendEmail()
-	if err != nil {
-		flash.Error("发送注册邮件时发生错误，请联系管理员")
-		flash.Store(&c.Controller)
-		c.Redirect("/register", http.StatusFound)
-		return
-	}
-
-	var token = uuid.Rand().Hex() // token 唯一
-
-	user := models.User{
-		Username: username,
-		Password: password,
-		Email:    email,
-		Active:   false,
-		Token:    token,
-		Image:    "/static/imgs/default.png",
+		err = models.EmailManager.SendEmail()
+		if err != nil {
+			flash.Error("发送注册邮件时发生错误，请联系管理员")
+			flash.Store(&c.Controller)
+			c.Redirect("/register", http.StatusFound)
+			return
+		}
+		flash.Success("注册验证邮件已经发送到您的邮箱，请激活后再登录")
+	} else {
+		user.Active = true // if email regist is false
 	}
 
 	if err := models.UserManager.SaveUser(&user); err != nil {
@@ -152,7 +156,7 @@ func (c *IndexController) Register() {
 		return
 	}
 
-	flash.Success("注册验证邮件已经发送到您的邮箱，请激活后再登录")
+	flash.Success("注册成功")
 	flash.Store(&c.Controller)
 	c.Redirect("/register", http.StatusFound)
 	return
