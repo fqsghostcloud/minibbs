@@ -107,7 +107,10 @@ func (e *Email) InitSendCfg(recAddr, recName string) error {
 	}
 
 	if e.senderkey = os.Getenv("senderkey"); e.senderkey == "" {
-		return fmt.Errorf("senderKey is null")
+		if e.senderkey = beego.AppConfig.String("key"); e.senderkey == "" {
+			return fmt.Errorf("senderKey is null")
+		}
+		
 	}
 
 	// glog.Infof("send email to user[%s] addr[%s] content[%s]\n", e.recName, e.recAddr, e.content)

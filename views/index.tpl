@@ -5,7 +5,7 @@
         <ul class="nav nav-pills">
           <li id="tab_0"><a href="/?tab=all">全部</a></li>
           {{range .Tags}}
-          <li id="tab_{{.Id}}"><a href="/?s={{.Id}}">{{.Name}}</a></li>
+          <li id="tab_{{.Id}}"><a href="/?tagId={{.Id}}">{{.Name}}</a></li>
           {{end}}
         </ul>
       </div>
@@ -57,16 +57,16 @@
 <script type="text/javascript" src="/static/js/bootstrap-paginator.min.js"></script>
 <script type="text/javascript">
   $(function () {
-    $("#tab_{{.Tag}}").addClass("active");
+    $("#tab_{{.TagId}}").addClass("active");
     $("#page").bootstrapPaginator({
       currentPage: '{{.Page.PageNo}}',
       totalPages: '{{.Page.TotalPage}}',
       bootstrapMajorVersion: 3,
       size: "small",
       onPageClicked: function(e,originalEvent,type,page){
-        var s = {{.Tag}};
-        if (s > 0) {
-          window.location.href = "/?p=" + page + "&s={{.Tag}}"
+        var tagId = {{.TagId}};
+        if (tagId > 0) {
+          window.location.href = "/?p=" + page + "&tagId={{.TagId}}"
         } else {
           window.location.href = "/?p=" + page
         }

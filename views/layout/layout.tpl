@@ -28,7 +28,7 @@
       <div Id="navbar" class="navbar-collapse collapse header-navbar">
         <ul class="nav navbar-nav navbar-right">
           <li>
-            <a href="/about">关于</a>
+            <a href="/about">公告</a>
           </li>
           {{if .IsLogin}}
           <li>

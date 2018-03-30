@@ -13,6 +13,7 @@ import (
 type TopicAPI interface {
 	SaveTopic(topic *Topic, tagsId []*Tag) int64
 	FindTopicById(id int) Topic
+	FindTagsToTopic(topic *Topic) *Topic
 	PageTopic(p int, size int, tag *Tag) utils.Page
 	IncrView(topic *Topic)
 	IncrReplyCount(topic *Topic)
@@ -44,7 +45,7 @@ func init() {
 }
 
 // SaveTopic .
-func (t *Topic) SaveTopic(topic *Topic, tagsId []*Tag) int64 {
+func (t *Topic) SaveTopic(topic *Topic, tags []*Tag) int64 {
 	o := orm.NewOrm()
 	id, err := o.Insert(topic)
 	if err != nil {
@@ -52,13 +53,12 @@ func (t *Topic) SaveTopic(topic *Topic, tagsId []*Tag) int64 {
 		return -1
 	}
 
-	// save topic_tags
-	for _, tag := range tagsId {
-		_, err := o.Raw("insert into topic_tags (topic_id, tag_id) values (?, ?)", topic.Id, tag.Id).Exec()
-		if err != nil {
-			fmt.Printf("save topic error: %s", err.Error())
-			return -1
-		}
+	//manytomany
+	m2m := o.QueryM2M(topic, "Tags")
+	_, err = m2m.Add(tags)
+	if err != nil {
+		fmt.Printf("save topic error: %s", err.Error())
+		return -1
 	}
 
 	return id
@@ -77,14 +77,49 @@ func (t *Topic) PageTopic(p int, size int, tag *Tag) utils.Page {
 	o := orm.NewOrm()
 	var topic Topic
 	var list []Topic
+
 	qs := o.QueryTable(topic)
 	if tag.Id > 0 {
-		qs = qs.Filter("Tag", tag)
+		qs = qs.Filter("Tags__Tag__Id", tag.Id)
 	}
 	countStr, _ := qs.Limit(-1).Count()
 	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
+
+	// project pointer problem----bug-------------------------------------
+	for k, topic := range list {
+		var tags []Tag
+		_, err := o.QueryTable(tag).Filter("Topics__Topic__Id", topic.Id).All(&tags)
+		if err != nil {
+			fmt.Printf("get page topic error[%s]", err.Error())
+		}
+
+		for _, ptag := range tags {
+			topic.Tags = append(topic.Tags, &ptag)
+		}
+
+		list[k] = topic //!!!
+	}
+
 	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
 	return utils.PageUtil(count, p, size, list)
+}
+
+func (t *Topic) FindTagsToTopic(topic *Topic) *Topic {
+	o := orm.NewOrm()
+	var tags []Tag
+
+	_, err := o.QueryTable(Tag{}).Filter("Topics__Topic__Id", topic.Id).All(&tags)
+	if err != nil {
+		fmt.Printf("get page topic error[%s]", err.Error())
+		return nil
+	}
+
+	for _, ptag := range tags {
+		topic.Tags = append(topic.Tags, &ptag)
+	}
+
+	return topic
+
 }
 
 func (t *Topic) IncrView(topic *Topic) {
@@ -110,7 +145,15 @@ func (t *Topic) FindTopicByUser(user *User, limit int) []*Topic {
 	o := orm.NewOrm()
 	var topic Topic
 	var topics []*Topic
-	o.QueryTable(topic).RelatedSel().Filter("User", user).OrderBy("-LastReplyTime", "-InTime").Limit(limit).All(&topics)
+
+	_, err := o.QueryTable(topic).RelatedSel().Filter("User", user).OrderBy("-LastReplyTime", "-InTime").Limit(limit).All(&topics)
+	if err != nil {
+		fmt.Printf("find topic by user error:[%s]", err.Error())
+	}
+
+	for _, topic := range topics {
+		topic = t.FindTagsToTopic(topic)
+	}
 	return topics
 }
 

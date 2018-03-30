@@ -5,9 +5,9 @@ import (
 )
 
 type Tag struct {
-	Id    int      `orm:"pk;auto"`
-	Name  string   `orm:"unique"`
-	Topic []*Topic `orm:"reverse(many)"`
+	Id     int      `orm:"pk;auto"`
+	Name   string   `orm:"unique"`
+	Topics []*Topic `orm:"reverse(many)"`
 }
 
 func FindAllTag() []*Tag {

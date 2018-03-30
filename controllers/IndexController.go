@@ -24,8 +24,8 @@ func (c *IndexController) Index() {
 		page = 1
 	}
 	size, _ := beego.AppConfig.Int("page.size")
-	tagId, _ := strconv.Atoi(c.Ctx.Input.Query("s"))
-	c.Data["Tag"] = tagId
+	tagId, _ := strconv.Atoi(c.Ctx.Input.Query("tagId"))
+	c.Data["TagId"] = tagId
 	tag := models.Tag{Id: tagId}
 	c.Data["Page"] = models.TopicManager.PageTopic(page, size, &tag)
 	c.Data["Tags"] = models.FindAllTag()
@@ -119,6 +119,7 @@ func (c *IndexController) Register() {
 
 	err := models.EmailManager.InitSendCfg(email, username)
 	if err != nil {
+		fmt.Printf("send email init error[%s]", err.Error())
 		flash.Error("发送注册邮件初始化时发生错误，请联系管理员")
 		flash.Store(&c.Controller)
 		c.Redirect("/register", http.StatusFound)
@@ -199,7 +200,7 @@ func (c *IndexController) Logout() {
 // About .
 func (c *IndexController) About() {
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
-	c.Data["PageTitle"] = "关于"
+	c.Data["PageTitle"] = "公告"
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "about.tpl"
 }
