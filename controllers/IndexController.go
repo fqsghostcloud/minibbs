@@ -19,15 +19,15 @@ type IndexController struct {
 func (c *IndexController) Index() {
 	c.Data["PageTitle"] = "首页"
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
-	p, _ := strconv.Atoi(c.Ctx.Input.Query("p"))
-	if p == 0 {
-		p = 1
+	page, _ := strconv.Atoi(c.Ctx.Input.Query("p"))
+	if page == 0 {
+		page = 1
 	}
 	size, _ := beego.AppConfig.Int("page.size")
-	s, _ := strconv.Atoi(c.Ctx.Input.Query("s"))
-	c.Data["S"] = s
-	tag := models.Tag{Id: s}
-	c.Data["Page"] = models.TopicManager.PageTopic(p, size, &tag)
+	tagId, _ := strconv.Atoi(c.Ctx.Input.Query("s"))
+	c.Data["Tag"] = tagId
+	tag := models.Tag{Id: tagId}
+	c.Data["Page"] = models.TopicManager.PageTopic(page, size, &tag)
 	c.Data["Tags"] = models.FindAllTag()
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "index.tpl"

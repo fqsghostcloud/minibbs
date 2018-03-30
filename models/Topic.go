@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"minibbs/utils"
 	"strconv"
 	"time"
@@ -10,7 +11,7 @@ import (
 
 // TopicAPI api for topic
 type TopicAPI interface {
-	SaveTopic(topic *Topic) int64
+	SaveTopic(topic *Topic, tagsId []*Tag) int64
 	FindTopicById(id int) Topic
 	PageTopic(p int, size int, tag *Tag) utils.Page
 	IncrView(topic *Topic)
@@ -43,9 +44,23 @@ func init() {
 }
 
 // SaveTopic .
-func (t *Topic) SaveTopic(topic *Topic) int64 {
+func (t *Topic) SaveTopic(topic *Topic, tagsId []*Tag) int64 {
 	o := orm.NewOrm()
-	id, _ := o.Insert(topic)
+	id, err := o.Insert(topic)
+	if err != nil {
+		fmt.Printf("save topic error: %s", err.Error())
+		return -1
+	}
+
+	// save topic_tags
+	for _, tag := range tagsId {
+		_, err := o.Raw("insert into topic_tags (topic_id, tag_id) values (?, ?)", topic.Id, tag.Id).Exec()
+		if err != nil {
+			fmt.Printf("save topic error: %s", err.Error())
+			return -1
+		}
+	}
+
 	return id
 }
 
@@ -66,10 +81,10 @@ func (t *Topic) PageTopic(p int, size int, tag *Tag) utils.Page {
 	if tag.Id > 0 {
 		qs = qs.Filter("Tag", tag)
 	}
-	count, _ := qs.Limit(-1).Count()
+	countStr, _ := qs.Limit(-1).Count()
 	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
-	c, _ := strconv.Atoi(strconv.FormatInt(count, 10))
-	return utils.PageUtil(c, p, size, list)
+	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
+	return utils.PageUtil(count, p, size, list)
 }
 
 func (t *Topic) IncrView(topic *Topic) {

@@ -13,8 +13,6 @@
               <span>{{.Topic.InTime | timeago}}</span>
               <span>•</span>
               <span>{{.Topic.View}}次点击</span>
-              <span>•</span>
-              <span>来自 <a href="/?s={{.Topic.Tag.Id}}">bug</a></span>
               {{if haspermission .UserInfo.Id "topic:edit"}}
                 <span>•</span>
                 <span><a href="/topic/edit/{{.Topic.Id}}">编辑</a></span>

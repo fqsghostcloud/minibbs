@@ -41,8 +41,8 @@ func (c *TopicController) Save() {
 		}
 
 		_, user := filters.IsLogin(c.Ctx)
-		topic := models.Topic{Title: title, Content: content, Tags: tags, User: &user}
-		id := models.TopicManager.SaveTopic(&topic)
+		topic := models.Topic{Title: title, Content: content, User: &user}
+		id := models.TopicManager.SaveTopic(&topic, tags)
 		c.Redirect("/topic/"+strconv.FormatInt(id, 10), 302)
 	}
 }

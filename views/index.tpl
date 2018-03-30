@@ -20,7 +20,9 @@
               <a href="/topic/{{.Id}}">{{.Title}}</a>
             </div>
             <p class="gray">
-              <span class="label label-primary">fix-bug</span>
+            {{range .Tags}}
+            <span class="label label-primary">{{.Name}}</span>
+            {{end}}
               <span>•</span>
               <span><a href="/user/{{.User.Username}}">{{.User.Username}}</a></span>
               <span class="hidden-sm hidden-xs">•</span>
@@ -55,16 +57,16 @@
 <script type="text/javascript" src="/static/js/bootstrap-paginator.min.js"></script>
 <script type="text/javascript">
   $(function () {
-    $("#tab_{{.S}}").addClass("active");
+    $("#tab_{{.Tag}}").addClass("active");
     $("#page").bootstrapPaginator({
       currentPage: '{{.Page.PageNo}}',
       totalPages: '{{.Page.TotalPage}}',
       bootstrapMajorVersion: 3,
       size: "small",
       onPageClicked: function(e,originalEvent,type,page){
-        var s = {{.S}};
+        var s = {{.Tag}};
         if (s > 0) {
-          window.location.href = "/?p=" + page + "&s={{.S}}"
+          window.location.href = "/?p=" + page + "&s={{.Tag}}"
         } else {
           window.location.href = "/?p=" + page
         }
