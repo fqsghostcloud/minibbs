@@ -54,8 +54,9 @@ func (c *TopicController) Detail() {
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 		topic := models.TopicManager.FindTopicById(tid)
 		models.TopicManager.IncrView(&topic) //查看+1
+		pTopic := models.TopicManager.FindTagsToTopic(&topic)
 		c.Data["PageTitle"] = topic.Title
-		c.Data["Topic"] = topic
+		c.Data["Topic"] = *pTopic
 		c.Data["Replies"] = models.ReplyManager.FindReplyByTopic(&topic)
 		c.Layout = "layout/layout.tpl"
 		c.TplName = "topic/detail.tpl"

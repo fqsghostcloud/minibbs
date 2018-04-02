@@ -6,7 +6,9 @@
           <div class="media-body">
             <h2 class="topic-detail-title">{{.Topic.Title}}</h2>
             <p class="gray">
-              <span class="label label-primary">bug</span>
+            {{range .Topic.Tags}}
+              <span class="label label-primary">{{.Name}}</span>
+              {{end}}
               <span>•</span>
               <span><a href="/user/{{.Topic.User.Username}}">{{.Topic.User.Username}}</a></span>
               <span>•</span>
