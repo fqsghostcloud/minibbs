@@ -18,7 +18,10 @@ type IndexController struct {
 // Index .
 func (c *IndexController) Index() {
 	c.Data["PageTitle"] = "首页"
-	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
+	isLogin, user := filters.IsLogin(c.Controller.Ctx)
+	c.Data["IsLogin"] = isLogin
+	c.Data["UserInfo"] = user
+
 	page, _ := strconv.Atoi(c.Ctx.Input.Query("p"))
 	if page == 0 {
 		page = 1

@@ -23,44 +23,63 @@ func init() {
 	beego.InsertFilter("/topic/create", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/create", &controllers.TopicController{}, "GET:Create")
 	beego.Router("/topic/create", &controllers.TopicController{}, "POST:Save")
+
 	beego.Router("/topic/:id([0-9]+)", &controllers.TopicController{}, "GET:Detail")
+
+	// beego.InsertFilter("/topic/:id([0-9]+)/join/*", beego.BeforeRouter, filters.HasPermission)
+
+	beego.Router("/topic/:id([0-9]+)/join/ws", &controllers.ChatRoomController{}, "GET:ChatRoomPage")
+	beego.Router("/topic/000/join/ws/chat", &controllers.ChatRoomController{}, "GET:Chat") // bug
+
 	beego.InsertFilter("/topic/edit/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/edit/:id([0-9]+)", &controllers.TopicController{}, "GET:Edit")
 	beego.Router("/topic/edit/:id([0-9]+)", &controllers.TopicController{}, "POST:Update")
+
 	beego.InsertFilter("/topic/delete/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/delete/:id([0-9]+)", &controllers.TopicController{}, "GET:Delete")
 
 	beego.InsertFilter("/reply/save", beego.BeforeRouter, filters.FilterUser)
 	beego.Router("/reply/save", &controllers.ReplyController{}, "POST:Save")
+
 	beego.InsertFilter("/reply/up", beego.BeforeRouter, filters.FilterUser)
 	beego.Router("/reply/up", &controllers.ReplyController{}, "GET:Up")
+
 	beego.InsertFilter("/reply/delete/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/reply/delete/:id([0-9]+)", &controllers.ReplyController{}, "GET:Delete")
 
 	beego.Router("/user/:username", &controllers.UserController{}, "GET:Detail")
 	beego.Router("/user/setting", &controllers.UserController{}, "GET:ToSetting")
+
 	beego.InsertFilter("/user/setting", beego.BeforeRouter, filters.FilterUser)
 	beego.Router("/user/setting", &controllers.UserController{}, "POST:Setting")
+
 	beego.InsertFilter("/user/updatepwd", beego.BeforeRouter, filters.FilterUser)
 	beego.Router("/user/updatepwd", &controllers.UserController{}, "POST:UpdatePwd")
+
 	beego.InsertFilter("/user/updateavatar", beego.BeforeRouter, filters.FilterUser)
 	beego.Router("/user/updateavatar", &controllers.UserController{}, "POST:UpdateAvatar")
+
 	beego.InsertFilter("/user/list", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/user/list", &controllers.UserController{}, "GET:List")
+
 	beego.InsertFilter("/user/delete/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/user/delete/:id([0-9]+)", &controllers.UserController{}, "GET:Delete")
+
 	beego.InsertFilter("/user/edit/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/user/edit/:id([0-9]+)", &controllers.UserController{}, "GET:Edit")
 	beego.Router("/user/edit/:id([0-9]+)", &controllers.UserController{}, "POST:Update")
 
 	beego.InsertFilter("/role/list", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/role/list", &controllers.RoleController{}, "GET:List")
+
 	beego.InsertFilter("/role/add", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/role/add", &controllers.RoleController{}, "GET:Add")
 	beego.Router("/role/add", &controllers.RoleController{}, "Post:Save")
+
 	beego.InsertFilter("/role/edit/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/role/edit/:id([0-9]+)", &controllers.RoleController{}, "GET:Edit")
 	beego.Router("/role/edit/:id([0-9]+)", &controllers.RoleController{}, "Post:Update")
+
 	beego.InsertFilter("/role/delete/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/role/delete/:id([0-9]+)", &controllers.RoleController{}, "GET:Delete")
 
