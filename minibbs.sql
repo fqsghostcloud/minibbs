@@ -96,10 +96,11 @@ VALUES
 UNLOCK TABLES;
 
 
+LOCK TABLES `user` WRITE;
 
 INSERT INTO `user` (`id`, `username`, `password`, `token`, `image`, `email`, `url`, `signature`, `in_time`, `last_time`, `active`)
 VALUES
-	(1,'root','123456','fcd1cb8e-b71f-46c3-9974-7225997b40c7','/static/imgs/default.png','1178996513@qq.com','https://minibbs.com','个人介绍','2016-08-26 09:22:16','1970-01-01 00:00:00', '1');
+	(1,'root','123456','fcd1cb8e-b71f-46c3-9974-7225997b40c7','/static/imgs/default.png','11278996513@qq.com','https://minibbs.com','个人介绍','2016-08-26 09:22:16','1970-01-01 00:00:00', '1');
 
 UNLOCK TABLES;
 

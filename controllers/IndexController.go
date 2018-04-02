@@ -139,6 +139,7 @@ func (c *IndexController) Register() {
 
 		err = models.EmailManager.SendEmail()
 		if err != nil {
+			fmt.Println(err.Error())
 			flash.Error("发送注册邮件时发生错误，请联系管理员")
 			flash.Store(&c.Controller)
 			c.Redirect("/register", http.StatusFound)
