@@ -12,8 +12,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// init chat room
+// init chat room config
 func init() {
+	chatroomMap = make(map[string]*ChatRoomCh)
 	go chatroom()
 }
 
@@ -25,19 +26,22 @@ type ChatRoomController struct {
 func (c *ChatRoomController) ChatRoomPage() {
 
 	uname := c.GetString("uname")
-	if len(uname) == 0 {
+	tid := c.GetString("tid")
+	if len(uname) == 0 || len(tid) == 0 {
 		c.Redirect("/", 302)
 		return
 	}
 
 	c.TplName = "websocket.html"
 	c.Data["UserName"] = uname
+	c.Data["TopicId"] = tid
 }
 
 // Join method handles WebSocket requests for WebSocketController.
 func (c *ChatRoomController) Chat() {
 	uname := c.GetString("uname")
-	if len(uname) == 0 {
+	tid := c.GetString("tid")
+	if len(uname) == 0 || len(tid) == 0 {
 		c.Redirect("/", 302)
 		return
 	}
@@ -54,9 +58,20 @@ func (c *ChatRoomController) Chat() {
 		}
 	}
 
+	chatroomch = &ChatRoomCh{
+		// Channel for new join users.
+		comeinChatterCh: make(chan Chatter, 10),
+		// Channel for exit users.
+		exitChatterCh: make(chan string, 10),
+		// Send events here to commonInfoCh them.
+		commonInfoCh: make(chan models.Event, 10),
+
+		chatterLists: list.New(),
+	}
+
 	// Join chat room.
-	Join(uname, ws)
-	defer Leave(uname)
+	Join(uname, ws, tid)
+	defer Leave(uname, tid)
 
 	// Message receive loop.
 	for {
@@ -66,25 +81,25 @@ func (c *ChatRoomController) Chat() {
 			return
 		}
 
-		commonInfoCh <- newEvent(models.EVENT_MESSAGE, uname, string(p))
+		chatroomMap[tid].commonInfoCh <- newEvent(models.EVENT_MESSAGE, uname, string(p))
 	}
 }
 
 // broadcastWebSocket broadcasts messages to WebSocket users.
-func broadcastWebSocket(event models.Event) {
+func broadcastWebSocket(event models.Event, pChatroomch *ChatRoomCh) {
 	data, err := json.Marshal(event)
 	if err != nil {
 		beego.Error("Fail to marshal event:", err)
 		return
 	}
 
-	for chatterItem := chatterLists.Front(); chatterItem != nil; chatterItem = chatterItem.Next() {
+	for chatterItem := pChatroomch.chatterLists.Front(); chatterItem != nil; chatterItem = chatterItem.Next() {
 		// Immediately send event to WebSocket users.
 		ws := chatterItem.Value.(Chatter).Conn //断言
 		if ws != nil {
 			if ws.WriteMessage(websocket.TextMessage, data) != nil {
 				// User disconnected.
-				exitChatterCh <- chatterItem.Value.(Chatter).Name
+				pChatroomch.exitChatterCh <- chatterItem.Value.(Chatter).Name
 			}
 		}
 	}
@@ -94,66 +109,71 @@ func newEvent(ep models.EventType, user, msg string) models.Event {
 	return models.Event{ep, user, int(time.Now().Unix()), msg}
 }
 
-func Join(userName string, ws *websocket.Conn) {
-	comeinChatterCh <- Chatter{Name: userName, Conn: ws}
+func Join(userName string, ws *websocket.Conn, topicId string) {
+	chatroomMap[topicId] = chatroomch
+	chatroomMap[topicId].comeinChatterCh <- Chatter{Name: userName, Conn: ws, TopicId: topicId}
 }
 
-func Leave(user string) {
-	exitChatterCh <- user
+func Leave(user string, topicId string) {
+	chatroomMap[topicId].exitChatterCh <- user
 }
 
 type Chatter struct {
-	Name string
-	Conn *websocket.Conn // Only for WebSocket users; otherwise nil.
+	Name    string
+	TopicId string
+	Conn    *websocket.Conn // Only for WebSocket users; otherwise nil.
 }
 
-var (
-	// Channel for new join users.
-	comeinChatterCh = make(chan Chatter, 10)
-	// Channel for exit users.
-	exitChatterCh = make(chan string, 10)
-	// Send events here to commonInfoCh them.
-	commonInfoCh = make(chan models.Event, 10)
+type ChatRoomCh struct {
+	comeinChatterCh chan Chatter
+	exitChatterCh   chan string
+	commonInfoCh    chan models.Event
+	chatterLists    *list.List
+}
 
-	chatterLists = list.New()
-)
+var chatroomMap map[string]*ChatRoomCh
+var chatroomch *ChatRoomCh
 
 // This function handles all incoming chan messages.
 func chatroom() {
 	for {
-		select {
-		case chatter := <-comeinChatterCh:
-			if !isUserExist(chatterLists, chatter.Name) {
-				chatterLists.PushBack(chatter) // Add user to the end of list.
-				// Publish a JOIN event.
-				commonInfoCh <- newEvent(models.EVENT_JOIN, chatter.Name, "")
-				beego.Info("New user:", chatter.Name, ";WebSocket:", chatter.Conn != nil)
-			} else {
-				beego.Info("Old user:", chatter.Name, ";WebSocket:", chatter.Conn != nil)
-			}
-		case event := <-commonInfoCh:
 
-			broadcastWebSocket(event)
-			// models.AddEvent(event) 从events list 获取消息历史记录
+		for _, v := range chatroomMap {
+			select {
+			case chatter := <-v.comeinChatterCh:
+				if !isUserExist(v.chatterLists, chatter.Name) {
+					v.chatterLists.PushBack(chatter) // Add user to the end of list.
+					// Publish a JOIN event.
+					v.commonInfoCh <- newEvent(models.EVENT_JOIN, chatter.Name, "")
+					beego.Info("New user:", chatter.Name, ";WebSocket:", chatter.Conn != nil)
+				} else {
+					beego.Info("Old user:", chatter.Name, ";WebSocket:", chatter.Conn != nil)
+				}
+			case event := <-v.commonInfoCh:
 
-			if event.Type == models.EVENT_MESSAGE {
-				beego.Info("Message from", event.User, ";Content:", event.Content)
-			}
-		case unsub := <-exitChatterCh:
-			for sub := chatterLists.Front(); sub != nil; sub = sub.Next() {
-				if sub.Value.(Chatter).Name == unsub {
-					chatterLists.Remove(sub)
-					// Clone connection.
-					ws := sub.Value.(Chatter).Conn
-					if ws != nil {
-						ws.Close()
-						beego.Error("WebSocket closed:", unsub)
+				broadcastWebSocket(event, v)
+				// models.AddEvent(event) 从events list 获取消息历史记录
+
+				if event.Type == models.EVENT_MESSAGE {
+					beego.Info("Message from", event.User, ";Content:", event.Content)
+				}
+			case unsub := <-v.exitChatterCh:
+				for sub := v.chatterLists.Front(); sub != nil; sub = sub.Next() {
+					if sub.Value.(Chatter).Name == unsub {
+						v.chatterLists.Remove(sub)
+						// Clone connection.
+						ws := sub.Value.(Chatter).Conn
+						if ws != nil {
+							ws.Close()
+							beego.Error("WebSocket closed:", unsub)
+						}
+						v.commonInfoCh <- newEvent(models.EVENT_LEAVE, unsub, "") // Publish a LEAVE event.
+						break
 					}
-					commonInfoCh <- newEvent(models.EVENT_LEAVE, unsub, "") // Publish a LEAVE event.
-					break
 				}
 			}
 		}
+
 	}
 }
 

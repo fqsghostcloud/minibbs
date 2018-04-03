@@ -36,7 +36,7 @@
                 <span>最后回复来自 <a href="/user/{{.LastReplyUser.Username}}">{{.LastReplyUser.Username}}</a></span>
               {{end}}
                <span>•</span>
-               <a href="/topic/{{.Id}}/join/ws?uname={{$.UserInfo.Username}}"><span class="hidden-sm hidden-xs">聊天室</span></a>
+               <a href="/topic/join/ws?uname={{$.UserInfo.Username}}&tid={{.Id}}"><span class="hidden-sm hidden-xs">聊天室</span></a>
             </p>
           </div>
         </div>

@@ -28,8 +28,8 @@ func init() {
 
 	// beego.InsertFilter("/topic/:id([0-9]+)/join/*", beego.BeforeRouter, filters.HasPermission)
 
-	beego.Router("/topic/:id([0-9]+)/join/ws", &controllers.ChatRoomController{}, "GET:ChatRoomPage")
-	beego.Router("/topic/000/join/ws/chat", &controllers.ChatRoomController{}, "GET:Chat") // bug
+	beego.Router("/topic/join/ws", &controllers.ChatRoomController{}, "GET:ChatRoomPage")
+	beego.Router("/topic/join/ws/chat", &controllers.ChatRoomController{}, "GET:Chat") // bug
 
 	beego.InsertFilter("/topic/edit/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/edit/:id([0-9]+)", &controllers.TopicController{}, "GET:Edit")
