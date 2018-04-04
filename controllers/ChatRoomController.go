@@ -12,12 +12,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// init chat room config
-func init() {
-	chatroomMap = make(map[string]*ChatRoomCh)
-	go chatroom()
-}
-
 type ChatRoomController struct {
 	beego.Controller
 }
@@ -58,19 +52,26 @@ func (c *ChatRoomController) Chat() {
 		}
 	}
 
-	chatroomch = &ChatRoomCh{
-		// Channel for new join users.
-		comeinChatterCh: make(chan Chatter, 10),
-		// Channel for exit users.
-		exitChatterCh: make(chan string, 10),
-		// Send events here to commonInfoCh them.
-		commonInfoCh: make(chan models.Event, 10),
+	if _, isExist := chatroomMap[tid]; !isExist {
+		chatroomch := &ChatRoomCh{
+			// Channel for new join users.
+			comeinChatterCh: make(chan Chatter, 10),
+			// Channel for exit users.
+			exitChatterCh: make(chan string, 10),
+			// Send events here to commonInfoCh them.
+			commonInfoCh: make(chan models.Event, 10),
 
-		chatterLists: list.New(),
+			chatterLists: list.New(),
+		}
+
+		chatroomMap[tid] = chatroomch
+		go chatroom(chatroomMap[tid])
 	}
 
+	chatter := Chatter{Name: uname, TopicId: tid, Conn: ws}
+
 	// Join chat room.
-	Join(uname, ws, tid)
+	Join(chatroomMap[tid], chatter)
 	defer Leave(uname, tid)
 
 	// Message receive loop.
@@ -109,9 +110,8 @@ func newEvent(ep models.EventType, user, msg string) models.Event {
 	return models.Event{ep, user, int(time.Now().Unix()), msg}
 }
 
-func Join(userName string, ws *websocket.Conn, topicId string) {
-	chatroomMap[topicId] = chatroomch
-	chatroomMap[topicId].comeinChatterCh <- Chatter{Name: userName, Conn: ws, TopicId: topicId}
+func Join(chatroomch *ChatRoomCh, chatter Chatter) {
+	chatroomch.comeinChatterCh <- chatter
 }
 
 func Leave(user string, topicId string) {
@@ -131,45 +131,41 @@ type ChatRoomCh struct {
 	chatterLists    *list.List
 }
 
-var chatroomMap map[string]*ChatRoomCh
-var chatroomch *ChatRoomCh
+var chatroomMap = make(map[string]*ChatRoomCh)
 
 // This function handles all incoming chan messages.
-func chatroom() {
+func chatroom(v *ChatRoomCh) {
 	for {
+		select {
+		case chatter := <-v.comeinChatterCh:
+			if !isUserExist(v.chatterLists, chatter.Name) {
+				v.chatterLists.PushBack(chatter) // Add user to the end of list.
+				// Publish a JOIN event.
+				v.commonInfoCh <- newEvent(models.EVENT_JOIN, chatter.Name, "")
+				beego.Info("New user:", chatter.Name, ";WebSocket:", chatter.Conn != nil)
+			} else {
+				beego.Info("Old user:", chatter.Name, ";WebSocket:", chatter.Conn != nil)
+			}
+		case event := <-v.commonInfoCh:
 
-		for _, v := range chatroomMap {
-			select {
-			case chatter := <-v.comeinChatterCh:
-				if !isUserExist(v.chatterLists, chatter.Name) {
-					v.chatterLists.PushBack(chatter) // Add user to the end of list.
-					// Publish a JOIN event.
-					v.commonInfoCh <- newEvent(models.EVENT_JOIN, chatter.Name, "")
-					beego.Info("New user:", chatter.Name, ";WebSocket:", chatter.Conn != nil)
-				} else {
-					beego.Info("Old user:", chatter.Name, ";WebSocket:", chatter.Conn != nil)
-				}
-			case event := <-v.commonInfoCh:
+			broadcastWebSocket(event, v)
+			// models.AddEvent(event) 从events list 获取消息历史记录
 
-				broadcastWebSocket(event, v)
-				// models.AddEvent(event) 从events list 获取消息历史记录
-
-				if event.Type == models.EVENT_MESSAGE {
-					beego.Info("Message from", event.User, ";Content:", event.Content)
-				}
-			case unsub := <-v.exitChatterCh:
-				for sub := v.chatterLists.Front(); sub != nil; sub = sub.Next() {
-					if sub.Value.(Chatter).Name == unsub {
-						v.chatterLists.Remove(sub)
-						// Clone connection.
-						ws := sub.Value.(Chatter).Conn
-						if ws != nil {
-							ws.Close()
-							beego.Error("WebSocket closed:", unsub)
-						}
-						v.commonInfoCh <- newEvent(models.EVENT_LEAVE, unsub, "") // Publish a LEAVE event.
-						break
+			if event.Type == models.EVENT_MESSAGE {
+				beego.Info("Message from", event.User, ";Content:", event.Content)
+			}
+		case unsub := <-v.exitChatterCh:
+			for sub := v.chatterLists.Front(); sub != nil; sub = sub.Next() {
+				if sub.Value.(Chatter).Name == unsub {
+					v.chatterLists.Remove(sub)
+					// Clone connection.
+					ws := sub.Value.(Chatter).Conn
+					if ws != nil {
+						ws.Close()
+						beego.Error("WebSocket closed:", unsub)
 					}
+					v.commonInfoCh <- newEvent(models.EVENT_LEAVE, unsub, "") // Publish a LEAVE event.
+					break
 				}
 			}
 		}
