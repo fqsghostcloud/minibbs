@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"minibbs/filters"
 	"minibbs/models"
 	"net/http"
@@ -109,6 +108,7 @@ func (c *IndexController) Register() {
 		Email:    email,
 		Token:    token,
 		Image:    "/static/imgs/default.png",
+		Active:   true,
 	}
 
 	if exsit, _ := models.UserManager.FindUserByUserName(username); exsit {
@@ -125,34 +125,6 @@ func (c *IndexController) Register() {
 		return
 	}
 
-	if isEmailRegist, _ := beego.AppConfig.Bool("emailRegist"); isEmailRegist {
-		authURL := models.EmailManager.GenerateAuthURL(email)
-		fmt.Printf("\n%s\n", authURL)
-		models.EmailManager.SetTheme("用户帐号激活") //设置主题
-		models.EmailManager.SetEmailContent(authURL)
-
-		err := models.EmailManager.InitSendCfg(email, username)
-		if err != nil {
-			fmt.Printf("send email init error[%s]", err.Error())
-			flash.Error("发送注册邮件初始化时发生错误，请联系管理员")
-			flash.Store(&c.Controller)
-			c.Redirect("/register", http.StatusFound)
-			return
-		}
-
-		err = models.EmailManager.SendEmail()
-		if err != nil {
-			fmt.Println(err.Error())
-			flash.Error("发送注册邮件时发生错误，请联系管理员")
-			flash.Store(&c.Controller)
-			c.Redirect("/register", http.StatusFound)
-			return
-		}
-		flash.Success("注册验证邮件已经发送到您的邮箱，请激活后再登录")
-	} else {
-		user.Active = true // if email regist is false
-	}
-
 	if err := models.UserManager.SaveUser(&user); err != nil {
 		flash.Error("注册用户失败:" + err.Error())
 		flash.Store(&c.Controller)
@@ -163,39 +135,6 @@ func (c *IndexController) Register() {
 	flash.Success("注册成功")
 	flash.Store(&c.Controller)
 	c.Redirect("/register", http.StatusFound)
-	return
-}
-
-// ActiveAccount activation user account by check email
-func (c *IndexController) ActiveAccount() {
-	flash := beego.NewFlash()
-	token := c.GetString("token")
-	fmt.Println("token: " + token)
-
-	if models.EmailManager != nil {
-		isAccess, email := models.EmailManager.CheckEmailURL(token)
-
-		if isAccess {
-			err := models.UserManager.ActiveAccount(email)
-			if err != nil {
-				// glog.Errorf("active user by email error[%s]\n", err.Error())
-				flash.Error("激活账户时发生错误，请联系管理员 " + err.Error())
-				flash.Store(&c.Controller)
-				c.Redirect("/login", http.StatusFound)
-				return
-			}
-		}
-		//需要设置cookie???????
-		// c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), token, 30 * 24 * 60 * 60, "/", beego.AppConfig.String("cookie.domain"), false, true)
-		flash.Success("激活账户成功")
-		flash.Store(&c.Controller)
-		c.Redirect("/login", http.StatusFound)
-		return
-	}
-
-	flash.Error("发送注册邮件时发生错误，请联系管理员")
-	flash.Store(&c.Controller)
-	c.Redirect("/login", http.StatusFound)
 	return
 }
 
