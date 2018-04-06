@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"encoding/json"
 	"fmt"
+	"minibbs/filters"
 	"minibbs/models"
 	"net/http"
 	"time"
@@ -22,6 +23,13 @@ func (c *ChatRoomController) ChatRoomPage() {
 	uname := c.GetString("uname")
 	tid := c.GetString("tid")
 	if len(uname) == 0 || len(tid) == 0 {
+		c.Redirect("/", 302)
+		return
+	}
+
+	//check usename is current user
+	_, currUser := filters.IsLogin(c.Ctx)
+	if currUser.Username != uname {
 		c.Redirect("/", 302)
 		return
 	}
@@ -84,6 +92,9 @@ func (c *ChatRoomController) Chat() {
 
 		chatroomMap[tid].commonInfoCh <- newEvent(models.EVENT_MESSAGE, uname, string(p))
 	}
+
+	c.TplName = "blank.tpl"
+
 }
 
 // broadcastWebSocket broadcasts messages to WebSocket users.

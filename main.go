@@ -38,7 +38,6 @@ func main() {
 	// defer glog.Flush()
 
 	// orm.Debug = true                                 // database debug model
-	beego.BConfig.WebConfig.Session.SessionOn = true // session on
 	beego.Run()
 	// glog.Flush()
 }

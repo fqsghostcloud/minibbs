@@ -26,8 +26,7 @@ func init() {
 
 	beego.Router("/topic/:id([0-9]+)", &controllers.TopicController{}, "GET:Detail")
 
-	// beego.InsertFilter("/topic/:id([0-9]+)/join/*", beego.BeforeRouter, filters.HasPermission)
-
+	beego.InsertFilter("/topic/join/ws/*", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/join/ws", &controllers.ChatRoomController{}, "GET:ChatRoomPage")
 	beego.Router("/topic/join/ws/chat", &controllers.ChatRoomController{}, "GET:Chat") // bug
 
