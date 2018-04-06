@@ -54,7 +54,7 @@ func (c *TopicController) Detail() {
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 		topic := models.TopicManager.FindTopicById(tid)
 		models.TopicManager.IncrView(&topic) //查看+1
-		pTopic := models.TopicManager.FindTagsToTopic(&topic)
+		pTopic := models.TopicManager.SetTagsToTopic(&topic)
 		c.Data["PageTitle"] = topic.Title
 		c.Data["Topic"] = *pTopic
 		c.Data["Replies"] = models.ReplyManager.FindReplyByTopic(&topic)
@@ -73,7 +73,8 @@ func (c *TopicController) Edit() {
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 		c.Data["PageTitle"] = "编辑话题"
 		c.Data["Tags"] = models.FindAllTag()
-		c.Data["Topic"] = topic
+		pTopic := models.TopicManager.SetTagsToTopic(&topic)
+		c.Data["Topic"] = pTopic
 		c.Layout = "layout/layout.tpl"
 		c.TplName = "topic/edit.tpl"
 	} else {
@@ -84,17 +85,17 @@ func (c *TopicController) Edit() {
 func (c *TopicController) Update() {
 	flash := beego.NewFlash()
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	title, content, sid := c.Input().Get("title"), c.Input().Get("content"), c.Input().Get("sid")
+	title, content, tid := c.Input().Get("title"), c.Input().Get("content"), c.Input().Get("tid")
 	if len(title) == 0 || len(title) > 120 {
 		flash.Error("话题标题不能为空且不能超过120个字符")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
-	} else if len(sid) == 0 {
-		flash.Error("请选择话题版块")
+	} else if len(tid) == 0 {
+		flash.Error("请选择话题标签")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
 	} else {
-		s, _ := strconv.Atoi(sid)
+		s, _ := strconv.Atoi(tid)
 		tag := models.Tag{Id: s}
 		topic := models.TopicManager.FindTopicById(id)
 		topic.Title = title

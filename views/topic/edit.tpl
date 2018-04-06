@@ -16,8 +16,8 @@
             <textarea name="content" Id="content" rows="15" class="form-control" placeholder="支持Markdown语法哦~">{{.Topic.Content}}</textarea>
           </div>
           <div class="form-group">
-            <label for="title">版块</label>
-            <select name="sid" Id="sid" class="form-control">
+            <label for="title">标签</label>
+            <select name="tid" Id="tid" class="form-control">
               {{range .Tags}}
                 <option value="{{.Id}}">{{.Name}}</option>
               {{end}}
@@ -31,6 +31,8 @@
 </div>
 <script type="text/javascript">
   $(function () {
-    $("#sid").val('{{.Topic.Tag.Id}}')
+    {{range .Topic.Tags}}
+    $("#tid").val('{{.Id}}')
+    {{end}}
   });
 </script>

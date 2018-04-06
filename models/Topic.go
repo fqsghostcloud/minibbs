@@ -13,7 +13,7 @@ import (
 type TopicAPI interface {
 	SaveTopic(topic *Topic, tagsId []*Tag) int64
 	FindTopicById(id int) Topic
-	FindTagsToTopic(topic *Topic) *Topic
+	SetTagsToTopic(topic *Topic) *Topic
 	PageTopic(p int, size int, tag *Tag) utils.Page
 	IncrView(topic *Topic)
 	IncrReplyCount(topic *Topic)
@@ -104,7 +104,7 @@ func (t *Topic) PageTopic(p int, size int, tag *Tag) utils.Page {
 	return utils.PageUtil(count, p, size, list)
 }
 
-func (t *Topic) FindTagsToTopic(topic *Topic) *Topic {
+func (t *Topic) SetTagsToTopic(topic *Topic) *Topic {
 	o := orm.NewOrm()
 	var tags []Tag
 
@@ -152,7 +152,7 @@ func (t *Topic) FindTopicByUser(user *User, limit int) []*Topic {
 	}
 
 	for _, topic := range topics {
-		topic = t.FindTagsToTopic(topic)
+		topic = t.SetTagsToTopic(topic)
 	}
 	return topics
 }
