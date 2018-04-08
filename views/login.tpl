@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-6 col-md-offset-3" sytle="float:none; display:block; margin-left:auto; margin-right:auto;">
     <div class="panel panel-default">
       <div class="panel-heading">登录</div>
       <div class="panel-body">

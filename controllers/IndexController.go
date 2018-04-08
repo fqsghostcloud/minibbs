@@ -41,9 +41,6 @@ func (c *IndexController) LoginPage() {
 	if IsLogin {
 		c.Redirect("/", 302)
 	} else {
-		beego.ReadFromRequest(&c.Controller)
-		u := models.UserManager.FindPermissionByUser(1)
-		beego.Debug(u) // ????????????????????????????????
 		c.Data["PageTitle"] = "登录"
 		c.Layout = "layout/layout.tpl"
 		c.TplName = "login.tpl"
@@ -100,7 +97,7 @@ func (c *IndexController) Register() {
 		return
 	}
 
-	var token = uuid.Rand().Hex() // token 唯一
+	var token = uuid.Rand().Hex() // user token
 
 	user := models.User{
 		Username: username,

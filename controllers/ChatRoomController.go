@@ -7,6 +7,7 @@ import (
 	"minibbs/filters"
 	"minibbs/models"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/astaxie/beego"
@@ -34,9 +35,22 @@ func (c *ChatRoomController) ChatRoomPage() {
 		return
 	}
 
-	c.TplName = "websocket.html"
+	topicId, err := strconv.Atoi(tid)
+	if err != nil {
+		beego.Error("get topic id for chatroon error[%s]", err.Error())
+		c.Ctx.WriteString("发生错误，请联系管理员")
+	}
+
+	topic := models.TopicManager.FindTopicById(topicId)
+
+	c.Data["UserInfo"] = currUser
+	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
+	c.Data["PageTitle"] = "聊天室"
 	c.Data["UserName"] = uname
-	c.Data["TopicId"] = tid
+	c.Data["TopicName"] = topic.Title
+	c.Data["TopicId"] = topicId
+	c.Layout = "layout/layout.tpl"
+	c.TplName = "chatroomcontroller/chatRoomPage.tpl"
 }
 
 // Join method handles WebSocket requests for WebSocketController.

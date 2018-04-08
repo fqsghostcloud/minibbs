@@ -50,7 +50,7 @@
         {{end}}
       </div>
       <div class="panel-footer">
-        <a href="/user/{{.CurrentUserInfo.Username}}/topics">{{.CurrentUserInfo.Username}}更多话题(bug)&gt;&gt;</a>
+        <a href="/user/{{.CurrentUserInfo.Username}}/topics">{{.CurrentUserInfo.Username}}更多话题(bug未实现)&gt;&gt;</a>
       </div>
     </div>
     <div class="panel panel-default">
@@ -73,7 +73,7 @@
         </tbody>
       </table>
       <div class="panel-footer">
-        <a href="/user/{{.CurrentUserInfo.Username}}/replies">{{.CurrentUserInfo.Username}}更多回复(bug)&gt;&gt;</a>
+        <a href="/user/{{.CurrentUserInfo.Username}}/replies">{{.CurrentUserInfo.Username}}更多回复(bug未实现)&gt;&gt;</a>
       </div>
     </div>
     {{else}}

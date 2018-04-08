@@ -11,13 +11,13 @@ $(document).ready(function () {
         switch (data.Type) {
         case 0: // JOIN
             if (data.User == $('#uname').text()) {
-                $("#chatbox li").first().before("<li>You joined the chat room.</li>");
+                $("#chatbox li").first().before("<li>你加入了聊天室.</li>");
             } else {
-                $("#chatbox li").first().before("<li>" + data.User + " joined the chat room.</li>");
+                $("#chatbox li").first().before("<li>" + data.User + " 加入了聊天室.</li>");
             }
             break;
         case 1: // LEAVE
-            $("#chatbox li").first().before("<li>" + data.User + " left the chat room.</li>");
+            $("#chatbox li").first().before("<li>" + data.User + " 离开了聊天室.</li>");
             break;
         case 2: // MESSAGE
             $("#chatbox li").first().before("<li><b>" + data.User + "</b>: " + data.Content + "</li>");

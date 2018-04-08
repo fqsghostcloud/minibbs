@@ -7,9 +7,11 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>{{.PageTitle}}</title>
   <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="/static/css/pybbs.css">
-  <script src="//cdn.bootcss.com/jquery/2.2.2/jquery.min.js"></script>
-  <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="/static/css/minibbs.css">
+  <script src="/static/js/jquery-1.10.1.min.js"></script>
+  <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/static/js/websocket.js"></script>
+  
 </head>
 <body>
 <div class="wrapper">
