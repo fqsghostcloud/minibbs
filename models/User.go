@@ -26,6 +26,7 @@ type API interface {
 	FindUserByUserEmail(email string) (bool, User)
 	FindPermissionByUser(id int) []*Permission
 	FindUserRolesByUserID(userID int) []orm.Params
+	SetRolesToUser(user *User) *User
 
 	SaveUser(user *User) error
 	SaveUserRole(userID int, roleID int)
@@ -59,6 +60,24 @@ var UserManager API
 
 func init() {
 	UserManager = new(User)
+}
+
+// SetRoleToUser
+func (u *User) SetRolesToUser(user *User) *User {
+	o := orm.NewOrm()
+	var roles []Role
+
+	_, err := o.QueryTable(Role{}).Filter("Users__User__Id", user.Id).All(&roles)
+	if err != nil {
+		fmt.Printf("get page topic error[%s]", err.Error())
+		return nil
+	}
+
+	for _, ptag := range roles {
+		user.Roles = append(user.Roles, &ptag)
+	}
+
+	return user
 }
 
 // ActiveAccount .
