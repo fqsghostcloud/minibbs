@@ -31,7 +31,7 @@
 </div>
 <script type="text/javascript">
   $(function () {
-    {{range .Topic.Tags}}
+    {{range .TopicTags}}
     $("#tid").val('{{.Id}}')
     {{end}}
   });

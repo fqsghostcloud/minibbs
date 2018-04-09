@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"minibbs/filters"
 	"minibbs/models"
 	"net/http"
@@ -31,7 +30,7 @@ func (c *IndexController) Index() {
 	c.Data["TagId"] = tagId
 	tag := models.Tag{Id: tagId}
 	c.Data["Page"] = models.TopicManager.PageTopic(page, size, &tag)
-	c.Data["Tags"] = models.FindAllTag()
+	c.Data["Tags"] = models.TagManager.FindAllTag()
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "index.tpl"
 }
@@ -66,19 +65,18 @@ func (c *IndexController) Login() {
 		return
 	}
 
-	user = models.UserManager.SetRolesToUser(user)
-	for _, role := range user.Roles {
-		fmt.Printf("user[%s] role[%s]\n", username, role.Name)
+	roles := models.RoleManager.FindRolesByUser(user)
+	for _, role := range roles {
 		if roleStr == role.Name {
 			hasRole = true
 		}
 	}
 
 	if !hasRole {
-		// flash.Error("登录身份类型错误")
-		// flash.Store(&c.Controller)
-		// c.Redirect("/login", 302)
-		// return
+		flash.Error("登录身份类型错误")
+		flash.Store(&c.Controller)
+		c.Redirect("/login", 302)
+		return
 	}
 
 	if exsit {
@@ -152,6 +150,10 @@ func (c *IndexController) Register() {
 		c.Redirect("/register", http.StatusFound)
 		return
 	}
+
+	// 普通用户赋值
+	role := models.RoleManager.FindRoleByName("普通用户")
+	models.UserManager.SaveUserRole(user.Id, role.Id)
 
 	flash.Success("注册成功")
 	flash.Store(&c.Controller)

@@ -13,12 +13,11 @@ import (
 type TopicAPI interface {
 	SaveTopic(topic *Topic, tagsId []*Tag) int64
 	FindTopicById(id int) Topic
-	SetTagsToTopic(topic *Topic) *Topic
 	PageTopic(p int, size int, tag *Tag) utils.Page
 	IncrView(topic *Topic)
 	IncrReplyCount(topic *Topic)
 	ReduceReplyCount(topic *Topic)
-	FindTopicByUser(user *User, limit int) []*Topic
+	FindTopicByUser(user *User, limit int) []Topic
 	UpdateTopic(topic *Topic)
 	DeleteTopic(topic *Topic)
 	DeleteTopicByUser(user *User)
@@ -104,24 +103,6 @@ func (t *Topic) PageTopic(p int, size int, tag *Tag) utils.Page {
 	return utils.PageUtil(count, p, size, list)
 }
 
-func (t *Topic) SetTagsToTopic(topic *Topic) *Topic {
-	o := orm.NewOrm()
-	var tags []Tag
-
-	_, err := o.QueryTable(Tag{}).Filter("Topics__Topic__Id", topic.Id).All(&tags)
-	if err != nil {
-		fmt.Printf("get page topic error[%s]", err.Error())
-		return nil
-	}
-
-	for _, ptag := range tags {
-		topic.Tags = append(topic.Tags, &ptag)
-	}
-
-	return topic
-
-}
-
 func (t *Topic) IncrView(topic *Topic) {
 	o := orm.NewOrm()
 	topic.View = topic.View + 1
@@ -141,19 +122,16 @@ func (t *Topic) ReduceReplyCount(topic *Topic) {
 }
 
 // FindTopicByUser .
-func (t *Topic) FindTopicByUser(user *User, limit int) []*Topic {
+func (t *Topic) FindTopicByUser(user *User, limit int) []Topic {
 	o := orm.NewOrm()
 	var topic Topic
-	var topics []*Topic
+	var topics []Topic
 
 	_, err := o.QueryTable(topic).RelatedSel().Filter("User", user).OrderBy("-LastReplyTime", "-InTime").Limit(limit).All(&topics)
 	if err != nil {
 		fmt.Printf("find topic by user error:[%s]", err.Error())
 	}
 
-	for _, topic := range topics {
-		topic = t.SetTagsToTopic(topic)
-	}
 	return topics
 }
 

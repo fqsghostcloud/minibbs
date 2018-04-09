@@ -134,7 +134,7 @@ func (c *UserController) Edit() {
 		if ok {
 			c.Data["User"] = user
 			c.Data["Roles"] = models.RoleManager.FindRoles()
-			c.Data["UserRoles"] = models.UserManager.FindUserRolesByUserID(id)
+			c.Data["UserRoles"] = models.RoleManager.FindRolesByUser(&user)
 			c.Layout = "layout/layout.tpl"
 			c.TplName = "user/edit.tpl"
 		} else {

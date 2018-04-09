@@ -16,7 +16,7 @@ func (c *TopicController) Create() {
 	beego.ReadFromRequest(&c.Controller)
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 	c.Data["PageTitle"] = "发布话题"
-	c.Data["Tags"] = models.FindAllTag()
+	c.Data["Tags"] = models.TagManager.FindAllTag()
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "topic/create.tpl"
 }
@@ -54,9 +54,10 @@ func (c *TopicController) Detail() {
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 		topic := models.TopicManager.FindTopicById(tid)
 		models.TopicManager.IncrView(&topic) //查看+1
-		pTopic := models.TopicManager.SetTagsToTopic(&topic)
+		topicTags := models.TagManager.FindTagsByTopic(&topic)
 		c.Data["PageTitle"] = topic.Title
-		c.Data["Topic"] = *pTopic
+		c.Data["Topic"] = topic
+		c.Data["TopicTags"] = topicTags
 		c.Data["Replies"] = models.ReplyManager.FindReplyByTopic(&topic)
 		c.Layout = "layout/layout.tpl"
 		c.TplName = "topic/detail.tpl"
@@ -72,9 +73,10 @@ func (c *TopicController) Edit() {
 		topic := models.TopicManager.FindTopicById(id)
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 		c.Data["PageTitle"] = "编辑话题"
-		c.Data["Tags"] = models.FindAllTag()
-		pTopic := models.TopicManager.SetTagsToTopic(&topic)
-		c.Data["Topic"] = pTopic
+		c.Data["Tags"] = models.TagManager.FindAllTag()
+		topicTags := models.TagManager.FindTagsByTopic(&topic)
+		c.Data["Topic"] = topic
+		c.Data["TopicTags"] = topicTags
 		c.Layout = "layout/layout.tpl"
 		c.TplName = "topic/edit.tpl"
 	} else {

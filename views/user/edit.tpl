@@ -29,7 +29,7 @@
 <script type="text/javascript">
   $(function () {
     {{range .UserRoles}}
-      $("#role_{{.role_id}}").attr("checked", true);
+      $("#role_{{.Id}}").attr("checked", true);
     {{end}}
   })
 </script>

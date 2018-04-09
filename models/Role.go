@@ -1,6 +1,10 @@
 package models
 
-import "github.com/astaxie/beego/orm"
+import (
+	"fmt"
+
+	"github.com/astaxie/beego/orm"
+)
 
 type Role struct {
 	Id          int           `orm:"pk;auto"`
@@ -18,6 +22,8 @@ type RoleAPI interface {
 	DeleteRolePermissionByRoleId(role_id int)
 	SaveRolePermission(role_id int, permission_id int)
 	FindRolePermissionByRoleId(role_id int) []orm.Params
+	FindRolesByUser(user *User) []Role
+	FindRoleByName(name string) Role
 }
 
 // RoleManager manager role api
@@ -25,6 +31,27 @@ var RoleManager RoleAPI
 
 func init() {
 	RoleManager = new(Role)
+}
+
+func (r *Role) FindRoleByName(name string) Role {
+	o := orm.NewOrm()
+	var role Role
+	o.QueryTable(role).Filter("Name", name).One(&role)
+	return role
+}
+
+// FindRolesByUser .
+func (r *Role) FindRolesByUser(user *User) []Role {
+	o := orm.NewOrm()
+	var roles []Role
+
+	_, err := o.QueryTable(Role{}).Filter("Users__User__Id", user.Id).All(&roles)
+	if err != nil {
+		fmt.Printf("get page topic error[%s]", err.Error())
+		return nil
+	}
+
+	return roles
 }
 
 // FindRoleById .
