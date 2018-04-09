@@ -33,6 +33,7 @@ type API interface {
 	DeleteUserRolesByUserID(userID int)
 
 	PageUser(p int, size int) utils.Page
+	FindPermissionByUserIDAndPermissionName(userID int, name string) bool
 }
 
 // User ..
@@ -185,7 +186,7 @@ func (u *User) DeactiveUser(username string) error {
 }
 
 // FindPermissionByUserIDAndPermissionName .
-func FindPermissionByUserIDAndPermissionName(userID int, name string) bool {
+func (u *User) FindPermissionByUserIDAndPermissionName(userID int, name string) bool {
 	o := orm.NewOrm()
 	var permission Permission
 	o.Raw("select p.* from permission p "+

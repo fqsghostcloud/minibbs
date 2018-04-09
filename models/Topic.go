@@ -13,7 +13,8 @@ import (
 type TopicAPI interface {
 	SaveTopic(topic *Topic, tagsId []*Tag) int64
 	FindTopicById(id int) Topic
-	PageTopic(p int, size int, tag *Tag) utils.Page
+	PageTopic(p int, size int, tag *Tag) utils.Page // get  topic with tag
+	PageTopicList(p int, size int) utils.Page       // just get topic list without tag
 	IncrView(topic *Topic)
 	IncrReplyCount(topic *Topic)
 	ReduceReplyCount(topic *Topic)
@@ -69,6 +70,19 @@ func (t *Topic) FindTopicById(id int) Topic {
 	var topic Topic
 	o.QueryTable(topic).RelatedSel().Filter("Id", id).One(&topic)
 	return topic
+}
+
+func (t *Topic) PageTopicList(p int, size int) utils.Page {
+	o := orm.NewOrm()
+	var topic Topic
+	var list []Topic
+
+	qs := o.QueryTable(topic)
+	countStr, _ := qs.Limit(-1).Count()
+	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
+
+	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
+	return utils.PageUtil(count, p, size, list)
 }
 
 // PageTopic .

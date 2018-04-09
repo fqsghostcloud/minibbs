@@ -20,7 +20,7 @@ func Markdown(content string) string {
 
 // HasPermission .
 func HasPermission(userID int, name string) bool {
-	return models.FindPermissionByUserIDAndPermissionName(userID, name)
+	return models.UserManager.FindPermissionByUserIDAndPermissionName(userID, name)
 }
 
 func init() {

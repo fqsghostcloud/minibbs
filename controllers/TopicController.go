@@ -119,3 +119,17 @@ func (c *TopicController) Delete() {
 		c.Ctx.WriteString("话题不存在")
 	}
 }
+
+func (c *TopicController) Manage() {
+	c.Data["PageTitle"] = "帖子列表"
+	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
+
+	size, _ := beego.AppConfig.Int("page.size")
+	pageNum, _ := strconv.Atoi(c.Ctx.Input.Query("pageNum"))
+	if pageNum == 0 {
+		pageNum = 1
+	}
+	c.Data["Page"] = models.TopicManager.PageTopicList(pageNum, size)
+	c.Layout = "layout/layout.tpl"
+	c.TplName = "topic/manage.tpl"
+}
