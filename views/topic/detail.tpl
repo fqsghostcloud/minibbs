@@ -55,7 +55,7 @@
               <span class="pull-right">
                 {{if haspermission $.UserInfo.Id "reply:delete"}}<a href="javascript:if(confirm('确定删除吗?')) location.href='/reply/delete/{{.Id}}'">删除</a>{{end}}
                 {{if $.IsLogin}}<a href="javascript:up('{{.Id}}');"><span class="glyphicon glyphicon-thumbs-up"></span></a>{{end}}
-                <span Id="up_{{.Id}}">{{.Up}}赞</span>
+                <span Id="up_{{.Id}}">{{.Up}}</span><span>赞</span>
               </span>
             </div>
             {{str2html (.Content | markdown)}}
@@ -102,6 +102,9 @@
           if(data.Code == 200) {
             var upele = $("#up_" + Id);
             upele.text(parseInt(upele.text()) + 1);
+          } else if (data.Code == 201) {
+            var upele = $("#up_" + Id);
+            upele.text(parseInt(upele.text()) - 1);
           } else {
             alert(data.Description)
           }

@@ -10,8 +10,7 @@
   <link rel="stylesheet" href="/static/css/minibbs.css">
   <script src="/static/js/jquery-1.10.1.min.js"></script>
   <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-  <script src="/static/js/websocket.js"></script>
-  
+
 </head>
 <body>
 <div class="wrapper">
@@ -71,5 +70,6 @@
   </div>
   <br>
 </div>
+{{.ChatRoomScript}}
 </body>
 </html>

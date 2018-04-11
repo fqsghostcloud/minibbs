@@ -18,6 +18,12 @@ func SaveReplyUpLog(replyUpLog *ReplyUpLog) int64 {
 	return id
 }
 
+func DeleteReplyUpLog(replyUpLog *ReplyUpLog) int64 {
+	o := orm.NewOrm()
+	id, _ := o.Delete(replyUpLog)
+	return id
+}
+
 func FindReplyUpLogByUserAndReply(user *User, reply *Reply) ReplyUpLog {
 	o := orm.NewOrm()
 	var replyUpLog ReplyUpLog

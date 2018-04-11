@@ -40,8 +40,12 @@ func (c *ReplyController) Up() {
 		reply := models.ReplyManager.FindReplyById(rid)
 		replyUpLog := models.FindReplyUpLogByUserAndReply(&user, &reply)
 		if replyUpLog.Id > 0 {
+			replyUpLog.User = &user
+			replyUpLog.Reply = &reply
+			models.DeleteReplyUpLog(&replyUpLog)
+			models.ReplyManager.DownReply(&reply)
 			result.Code = 201
-			result.Description = "你已经赞过这条回复了"
+			// result.Description = "你已取消点赞"
 		} else {
 			replyUpLog.User = &user
 			replyUpLog.Reply = &reply

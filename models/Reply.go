@@ -13,6 +13,7 @@ type ReplyAPI interface {
 	FindReplyByTopic(topic *Topic) []*Reply
 	SaveReply(reply *Reply) int64
 	UpReply(reply *Reply)
+	DownReply(reply *Reply)
 	FindReplyByUser(user *User, limit int, page int, size int) utils.Page
 	DeleteReplyByTopic(topic *Topic)
 	DeleteReply(reply *Reply)
@@ -57,6 +58,12 @@ func (r *Reply) SaveReply(reply *Reply) int64 {
 func (r *Reply) UpReply(reply *Reply) {
 	o := orm.NewOrm()
 	reply.Up = reply.Up + 1
+	o.Update(reply, "Up")
+}
+
+func (r *Reply) DownReply(reply *Reply) {
+	o := orm.NewOrm()
+	reply.Up = reply.Up - 1
 	o.Update(reply, "Up")
 }
 

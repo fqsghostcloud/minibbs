@@ -51,6 +51,9 @@ func (c *ChatRoomController) ChatRoomPage() {
 	c.Data["TopicId"] = topicId
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "chatroomcontroller/chatRoomPage.tpl"
+	
+	c.LayoutSections = make(map[string]string)
+	c.LayoutSections["ChatRoomScript"] = "chatroomcontroller/ChatRoomScript.tpl"
 }
 
 // Join method handles WebSocket requests for WebSocketController.
