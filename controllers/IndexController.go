@@ -21,7 +21,7 @@ func (c *IndexController) Index() {
 	c.Data["IsLogin"] = isLogin
 	c.Data["UserInfo"] = user
 
-	page, _ := strconv.Atoi(c.Ctx.Input.Query("p"))
+	page, _ := strconv.Atoi(c.Ctx.Input.Query("page"))
 	if page == 0 {
 		page = 1
 	}

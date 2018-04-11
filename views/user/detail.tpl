@@ -21,7 +21,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">{{.CurrentUserInfo.Username}}创建的话题</div>
       <div class="panel-body">
-        {{range .Topics}}
+        {{range .Topics.List}}
         <div class="media">
           <div class="media-body">
             <div class="title">
@@ -50,14 +50,14 @@
         {{end}}
       </div>
       <div class="panel-footer">
-        <a href="/user/{{.CurrentUserInfo.Username}}/topics">{{.CurrentUserInfo.Username}}更多话题(bug未实现)&gt;&gt;</a>
+        <a href="/user/{{.CurrentUserInfo.Username}}/topics">{{.CurrentUserInfo.Username}}更多帖子&gt;&gt;</a>
       </div>
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">{{.CurrentUserInfo.Username}}回复的话题</div>
       <table class="table table-striped">
         <tbody>
-        {{range .Replies}}
+        {{range .Replies.List}}
         <tr>
           <td>
             {{.InTime | timeago}}
@@ -73,7 +73,7 @@
         </tbody>
       </table>
       <div class="panel-footer">
-        <a href="/user/{{.CurrentUserInfo.Username}}/replies">{{.CurrentUserInfo.Username}}更多回复(bug未实现)&gt;&gt;</a>
+        <a href="/user/{{.CurrentUserInfo.Username}}/replies">{{.CurrentUserInfo.Username}}更多回复&gt;&gt;</a>
       </div>
     </div>
     {{else}}

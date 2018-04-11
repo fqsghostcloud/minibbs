@@ -68,9 +68,9 @@
       onPageClicked: function(e,originalEvent,type,page){
         var tagId = {{.TagId}};
         if (tagId > 0) {
-          window.location.href = "/?p=" + page + "&tagId={{.TagId}}"
+          window.location.href = "/?page=" + page + "&tagId={{.TagId}}"
         } else {
-          window.location.href = "/?p=" + page
+          window.location.href = "/?page=" + page
         }
       }
     });

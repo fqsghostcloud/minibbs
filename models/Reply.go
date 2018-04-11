@@ -1,6 +1,8 @@
 package models
 
 import (
+	"minibbs/utils"
+	"strconv"
 	"time"
 
 	"github.com/astaxie/beego/orm"
@@ -11,7 +13,7 @@ type ReplyAPI interface {
 	FindReplyByTopic(topic *Topic) []*Reply
 	SaveReply(reply *Reply) int64
 	UpReply(reply *Reply)
-	FindReplyByUser(user *User, limit int) []*Reply
+	FindReplyByUser(user *User, limit int, page int, size int) utils.Page
 	DeleteReplyByTopic(topic *Topic)
 	DeleteReply(reply *Reply)
 	DeleteReplyByUser(user *User)
@@ -58,12 +60,24 @@ func (r *Reply) UpReply(reply *Reply) {
 	o.Update(reply, "Up")
 }
 
-func (r *Reply) FindReplyByUser(user *User, limit int) []*Reply {
+func (r *Reply) FindReplyByUser(user *User, limit int, page int, size int) utils.Page {
 	o := orm.NewOrm()
 	var reply Reply
-	var replies []*Reply
-	o.QueryTable(reply).RelatedSel("Topic", "User").Filter("User", user).OrderBy("-InTime").Limit(limit).All(&replies)
-	return replies
+	var replies []Reply
+
+	if page == 0 || size == 0 {
+		o.QueryTable(reply).RelatedSel("Topic", "User").Filter("User", user).OrderBy("-InTime").Limit(limit).All(&replies)
+		page := utils.Page{List: replies}
+		return page
+	}
+
+	qs := o.QueryTable(reply)
+	countStr, _ := qs.Limit(-1).Count()
+	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&replies)
+
+	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
+	return utils.PageUtil(count, page, size, replies)
+
 }
 
 func (r *Reply) DeleteReplyByTopic(topic *Topic) {

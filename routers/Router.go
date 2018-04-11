@@ -10,7 +10,7 @@ import (
 func init() {
 
 	beego.Router("/test", &controllers.TestController{}, "GET:TestActive")
-	//
+	//登录注册
 	beego.Router("/", &controllers.IndexController{}, "GET:Index")
 	beego.Router("/login", &controllers.IndexController{}, "GET:LoginPage")
 	beego.Router("/login", &controllers.IndexController{}, "POST:Login")
@@ -18,16 +18,17 @@ func init() {
 	beego.Router("/register", &controllers.IndexController{}, "POST:Register")
 	beego.Router("/logout", &controllers.IndexController{}, "GET:Logout")
 
+	//聊天室
+	beego.InsertFilter("/topic/join/ws/*", beego.BeforeRouter, filters.HasPermission)
+	beego.Router("/topic/join/ws", &controllers.ChatRoomController{}, "GET:ChatRoomPage")
+	beego.Router("/topic/join/ws/chat", &controllers.ChatRoomController{}, "GET:Chat") // bug
+
+	//创建，修改，删除帖子
 	beego.InsertFilter("/topic/create", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/create", &controllers.TopicController{}, "GET:Create")
 	beego.Router("/topic/create", &controllers.TopicController{}, "POST:Save")
 
 	beego.Router("/topic/:id([0-9]+)", &controllers.TopicController{}, "GET:Detail")
-
-	//聊天室
-	beego.InsertFilter("/topic/join/ws/*", beego.BeforeRouter, filters.HasPermission)
-	beego.Router("/topic/join/ws", &controllers.ChatRoomController{}, "GET:ChatRoomPage")
-	beego.Router("/topic/join/ws/chat", &controllers.ChatRoomController{}, "GET:Chat") // bug
 
 	beego.InsertFilter("/topic/edit/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/edit/:id([0-9]+)", &controllers.TopicController{}, "GET:Edit")
@@ -46,6 +47,7 @@ func init() {
 	beego.Router("/tag/manage/update", &controllers.TopicController{}, "Post:UpdateTag")
 	beego.Router("/tag/manage/delete/:id([0-9]+)", &controllers.TopicController{}, "GET:DeleteTag")
 
+	//回复
 	beego.InsertFilter("/reply/save", beego.BeforeRouter, filters.FilterUser)
 	beego.Router("/reply/save", &controllers.ReplyController{}, "POST:Save")
 
@@ -55,6 +57,7 @@ func init() {
 	beego.InsertFilter("/reply/delete/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/reply/delete/:id([0-9]+)", &controllers.ReplyController{}, "GET:Delete")
 
+	//用户
 	beego.Router("/user/:username", &controllers.UserController{}, "GET:Detail")
 	beego.Router("/user/setting", &controllers.UserController{}, "GET:ToSetting")
 
@@ -77,6 +80,10 @@ func init() {
 	beego.Router("/user/edit/:id([0-9]+)", &controllers.UserController{}, "GET:Edit")
 	beego.Router("/user/edit/:id([0-9]+)", &controllers.UserController{}, "POST:Update")
 
+	beego.Router("/user/:username/topics", &controllers.TopicController{}, "GET:UserTopic")
+	beego.Router("/user/:username/replies", &controllers.ReplyController{}, "GET:UserReplay")
+
+	//角色管理
 	beego.InsertFilter("/role/list", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/role/list", &controllers.RoleController{}, "GET:List")
 
@@ -91,6 +98,7 @@ func init() {
 	beego.InsertFilter("/role/delete/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/role/delete/:id([0-9]+)", &controllers.RoleController{}, "GET:Delete")
 
+	//权限管理
 	beego.InsertFilter("/permission/list", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/permission/list", &controllers.PermissionController{}, "GET:List")
 	beego.InsertFilter("/permission/add", beego.BeforeRouter, filters.HasPermission)

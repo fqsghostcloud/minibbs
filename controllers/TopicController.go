@@ -261,3 +261,21 @@ func (c *TopicController) DeleteTag() {
 	}
 	return
 }
+
+func (c *TopicController) UserTopic() {
+	username := c.Ctx.Input.Param(":username")
+	size, _ := beego.AppConfig.Int("page.size")
+	pageNum, _ := strconv.Atoi(c.Ctx.Input.Query("page"))
+	if pageNum == 0 {
+		pageNum = 1
+	}
+	ok, user := models.UserManager.FindUserByUserName(username)
+	if ok {
+		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
+		c.Data["PageTitle"] = "个人主页"
+		c.Data["CurrentUserInfo"] = user
+		c.Data["Page"] = models.TopicManager.FindTopicByUser(&user, -1, pageNum, size)
+	}
+	c.Layout = "layout/layout.tpl"
+	c.TplName = "user/allTopic.tpl"
+}

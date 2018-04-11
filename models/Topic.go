@@ -20,7 +20,7 @@ type TopicAPI interface {
 	IncrView(topic *Topic)
 	IncrReplyCount(topic *Topic)
 	ReduceReplyCount(topic *Topic)
-	FindTopicByUser(user *User, limit int) []Topic
+	FindTopicByUser(user *User, limit int, page int, size int) utils.Page
 	UpdateTopic(topic *Topic)
 	DeleteTopic(topic *Topic)
 	DeleteTopicByUser(user *User)
@@ -131,17 +131,30 @@ func (t *Topic) ReduceReplyCount(topic *Topic) {
 }
 
 // FindTopicByUser .
-func (t *Topic) FindTopicByUser(user *User, limit int) []Topic {
+func (t *Topic) FindTopicByUser(user *User, limit int, page int, size int) utils.Page {
 	o := orm.NewOrm()
 	var topic Topic
 	var topics []Topic
 
-	_, err := o.QueryTable(topic).RelatedSel().Filter("User", user).OrderBy("-LastReplyTime", "-InTime").Limit(limit).All(&topics)
-	if err != nil {
-		fmt.Printf("find topic by user error:[%s]", err.Error())
+	//不分页
+	if page == 0 || size == 0 {
+		_, err := o.QueryTable(topic).RelatedSel().Filter("User", user).OrderBy("-LastReplyTime", "-InTime").Limit(limit).All(&topics)
+		if err != nil {
+			fmt.Printf("find topic by user error:[%s]", err.Error())
+		}
+
+		page := utils.Page{List: topics}
+
+		return page
 	}
 
-	return topics
+	qs := o.QueryTable(topic)
+	countStr, _ := qs.Limit(-1).Count()
+	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&topics)
+
+	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
+	return utils.PageUtil(count, page, size, topics)
+
 }
 
 // UpdateTopic .

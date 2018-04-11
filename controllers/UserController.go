@@ -21,8 +21,8 @@ func (c *UserController) Detail() {
 		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 		c.Data["PageTitle"] = "个人主页"
 		c.Data["CurrentUserInfo"] = user
-		c.Data["Topics"] = models.TopicManager.FindTopicByUser(&user, 7)
-		c.Data["Replies"] = models.ReplyManager.FindReplyByUser(&user, 7)
+		c.Data["Topics"] = models.TopicManager.FindTopicByUser(&user, 5, 0, 0)
+		c.Data["Replies"] = models.ReplyManager.FindReplyByUser(&user, 5, 0, 0)
 	}
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "user/detail.tpl"
