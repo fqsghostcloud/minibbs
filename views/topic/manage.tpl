@@ -10,10 +10,10 @@
           <tbody>
           {{range .Page.List}}
           <tr>
-            <td><a href="/topic/{{.Username}}" target="_blank">{{.Username}}</a></td>
+            <td><a href="/topic/{{.Id}}">{{.Title}}</a></td>
             <td>
               <a href="/topic/edit/{{.Id}}" class="btn btn-xs btn-warning">修改帖子</a>
-              <a href="javascript:if(confirm('确认删除吗?')) location.href='//delete/{{.Id}}'" class="btn btn-xs btn-danger">删除</a>
+              <a href="javascript:if(confirm('确认删除吗?')) location.href='/topic/delete/{{.Id}}'" class="btn btn-xs btn-danger">删除</a>
             </td>
           </tr>
           {{end}}

@@ -16,12 +16,13 @@
             <textarea name="content" Id="content" rows="15" class="form-control" placeholder="支持Markdown语法哦~"></textarea>
           </div>
           <div class="form-group">
-            <label for="title">版块</label>
-            <select name="tids" Id="tids" class="form-control">
+            <label for="title">标签</label>
+             <div>
               {{range .Tags}}
-                <option value="{{.Id}}">{{.Name}}</option>
+                <input type="checkbox" name="tids" value="{{.Id}}" id="tag_{{.Id}}">
+                <label for="{{.Id}}">{{.Name}}</label>&nbsp;
               {{end}}
-            </select>
+            </div>
           </div>
           <button type="submit" class="btn btn-default">发布</button>
         </form>

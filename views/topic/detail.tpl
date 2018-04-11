@@ -6,7 +6,7 @@
           <div class="media-body">
             <h2 class="topic-detail-title">{{.Topic.Title}}</h2>
             <p class="gray">
-            {{range .Topic.Tags}}
+            {{range .TopicTags}}
               <span class="label label-primary">{{.Name}}</span>
               {{end}}
               <span>•</span>

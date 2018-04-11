@@ -23,8 +23,14 @@ func HasPermission(userID int, name string) bool {
 	return models.UserManager.FindPermissionByUserIDAndPermissionName(userID, name)
 }
 
+func GetTopicTags(topicName string) []models.Tag {
+	topic := models.TopicManager.FindTopicByName(topicName)
+	return models.TagManager.FindTagsByTopic(&topic)
+}
+
 func init() {
 	beego.AddFuncMap("timeago", FormatTime)
 	beego.AddFuncMap("markdown", Markdown)
 	beego.AddFuncMap("haspermission", HasPermission)
+	beego.AddFuncMap("getTopicTags", GetTopicTags)
 }

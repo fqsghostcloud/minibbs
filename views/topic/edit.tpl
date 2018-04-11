@@ -17,11 +17,12 @@
           </div>
           <div class="form-group">
             <label for="title">标签</label>
-            <select name="tid" Id="tid" class="form-control">
+             <div>
               {{range .Tags}}
-                <option value="{{.Id}}">{{.Name}}</option>
+                <input type="checkbox" name="tids" value="{{.Id}}" id="tag_{{.Id}}">
+                <label for="{{.Id}}">{{.Name}}</label>&nbsp;
               {{end}}
-            </select>
+            </div>
           </div>
           <button type="submit" class="btn btn-default">发布</button>
         </form>
@@ -32,7 +33,7 @@
 <script type="text/javascript">
   $(function () {
     {{range .TopicTags}}
-    $("#tid").val('{{.Id}}')
+    $("#tag_{{.Id}}").attr("checked", true);
     {{end}}
   });
 </script>

@@ -20,7 +20,7 @@
               <a href="/topic/{{.Id}}">{{.Title}}</a>
             </div>
             <p class="gray">
-            {{range .Tags}}
+             {{range  .Title | getTopicTags}}
             <span class="label label-primary">{{.Name}}</span>
             {{end}}
               <span>•</span>

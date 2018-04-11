@@ -12,7 +12,9 @@ import (
 // TopicAPI api for topic
 type TopicAPI interface {
 	SaveTopic(topic *Topic, tagsId []*Tag) int64
+	SaveTopicTag(topicId int, tagId int)
 	FindTopicById(id int) Topic
+	FindTopicByName(name string) Topic
 	PageTopic(p int, size int, tag *Tag) utils.Page // get  topic with tag
 	PageTopicList(p int, size int) utils.Page       // just get topic list without tag
 	IncrView(topic *Topic)
@@ -22,6 +24,7 @@ type TopicAPI interface {
 	UpdateTopic(topic *Topic)
 	DeleteTopic(topic *Topic)
 	DeleteTopicByUser(user *User)
+	DeleteTopicTagsByTopicId(topicId int)
 }
 
 type Topic struct {
@@ -72,6 +75,13 @@ func (t *Topic) FindTopicById(id int) Topic {
 	return topic
 }
 
+func (t *Topic) FindTopicByName(name string) Topic {
+	o := orm.NewOrm()
+	var topic Topic
+	o.QueryTable(topic).RelatedSel().Filter("Title", name).One(&topic)
+	return topic
+}
+
 func (t *Topic) PageTopicList(p int, size int) utils.Page {
 	o := orm.NewOrm()
 	var topic Topic
@@ -97,21 +107,6 @@ func (t *Topic) PageTopic(p int, size int, tag *Tag) utils.Page {
 	}
 	countStr, _ := qs.Limit(-1).Count()
 	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
-
-	// project pointer problem----bug-------------------------------------
-	for k, topic := range list {
-		var tags []Tag
-		_, err := o.QueryTable(tag).Filter("Topics__Topic__Id", topic.Id).All(&tags)
-		if err != nil {
-			fmt.Printf("get page topic error[%s]", err.Error())
-		}
-
-		for _, ptag := range tags {
-			topic.Tags = append(topic.Tags, &ptag)
-		}
-
-		list[k] = topic //!!!
-	}
 
 	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
 	return utils.PageUtil(count, p, size, list)
@@ -165,4 +160,15 @@ func (t *Topic) DeleteTopic(topic *Topic) {
 func (t *Topic) DeleteTopicByUser(user *User) {
 	o := orm.NewOrm()
 	o.Raw("delete from topic where user_id = ?", user.Id).Exec()
+}
+
+// SaveUserRole .
+func (t *Topic) SaveTopicTag(topicId int, tagId int) {
+	o := orm.NewOrm()
+	o.Raw("insert into topic_tags (topic_id, tag_id) values (?, ?)", topicId, tagId).Exec()
+}
+
+func (t *Topic) DeleteTopicTagsByTopicId(topicId int) {
+	o := orm.NewOrm()
+	o.Raw("delete from topic_tags where topic_id = ?", topicId).Exec()
 }

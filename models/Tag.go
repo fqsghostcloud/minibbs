@@ -2,6 +2,8 @@ package models
 
 import (
 	"fmt"
+	"minibbs/utils"
+	"strconv"
 
 	"github.com/astaxie/beego/orm"
 )
@@ -15,6 +17,11 @@ type Tag struct {
 type TagAPI interface {
 	FindAllTag() []Tag
 	FindTagsByTopic(topic *Topic) []Tag
+	FinTagById(id int) (*Tag, error)
+	PageTagList(p int, size int) utils.Page
+	SaveTag(tag *Tag) error
+	UpdateTag(tag *Tag) error
+	DeleteTag(tag *Tag) error
 }
 
 // TagManager manager tag api
@@ -44,4 +51,55 @@ func (t *Tag) FindTagsByTopic(topic *Topic) []Tag {
 	}
 
 	return tags
+}
+
+func (t *Tag) PageTagList(p int, size int) utils.Page {
+	o := orm.NewOrm()
+	var tag Tag
+	var list []Tag
+
+	qs := o.QueryTable(tag)
+	countStr, _ := qs.Limit(-1).Count()
+	qs.RelatedSel().Limit(size).Offset((p - 1) * size).All(&list)
+
+	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
+	return utils.PageUtil(count, p, size, list)
+}
+
+func (t *Tag) SaveTag(tag *Tag) error {
+	o := orm.NewOrm()
+	_, err := o.Insert(tag)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *Tag) UpdateTag(tag *Tag) error {
+	o := orm.NewOrm()
+	_, err := o.Update(tag, "Name")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *Tag) DeleteTag(tag *Tag) error {
+	o := orm.NewOrm()
+	_, err := o.Delete(tag)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *Tag) FinTagById(id int) (*Tag, error) {
+	o := orm.NewOrm()
+	tag := Tag{}
+	err := o.QueryTable(tag).Filter("Id", id).One(&tag)
+	if err != nil {
+		return nil, err
+	}
+	return &tag, nil
 }

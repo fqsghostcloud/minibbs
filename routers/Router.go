@@ -17,7 +17,6 @@ func init() {
 	beego.Router("/register", &controllers.IndexController{}, "GET:RegisterPage")
 	beego.Router("/register", &controllers.IndexController{}, "POST:Register")
 	beego.Router("/logout", &controllers.IndexController{}, "GET:Logout")
-	beego.Router("/about", &controllers.IndexController{}, "GET:About")
 
 	beego.InsertFilter("/topic/create", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/create", &controllers.TopicController{}, "GET:Create")
@@ -25,6 +24,7 @@ func init() {
 
 	beego.Router("/topic/:id([0-9]+)", &controllers.TopicController{}, "GET:Detail")
 
+	//聊天室
 	beego.InsertFilter("/topic/join/ws/*", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/join/ws", &controllers.ChatRoomController{}, "GET:ChatRoomPage")
 	beego.Router("/topic/join/ws/chat", &controllers.ChatRoomController{}, "GET:Chat") // bug
@@ -38,6 +38,13 @@ func init() {
 	//发帖管理
 	beego.InsertFilter("/topic/manage", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/manage", &controllers.TopicController{}, "GET:Manage")
+
+	//标签管理
+	beego.InsertFilter("/tag/manage", beego.BeforeRouter, filters.HasPermission)
+	beego.Router("/tag/manage", &controllers.TopicController{}, "GET:TagManage")
+	beego.Router("/tag/manage/save", &controllers.TopicController{}, "Post:SaveTag")
+	beego.Router("/tag/manage/update", &controllers.TopicController{}, "Post:UpdateTag")
+	beego.Router("/tag/manage/delete/:id([0-9]+)", &controllers.TopicController{}, "GET:DeleteTag")
 
 	beego.InsertFilter("/reply/save", beego.BeforeRouter, filters.FilterUser)
 	beego.Router("/reply/save", &controllers.ReplyController{}, "POST:Save")

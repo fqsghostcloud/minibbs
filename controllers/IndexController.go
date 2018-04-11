@@ -166,11 +166,3 @@ func (c *IndexController) Logout() {
 	c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), "", -1, "/", beego.AppConfig.String("cookie.domain"), false, true)
 	c.Redirect("/", 302)
 }
-
-// About .
-func (c *IndexController) About() {
-	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
-	c.Data["PageTitle"] = "公告"
-	c.Layout = "layout/layout.tpl"
-	c.TplName = "about.tpl"
-}

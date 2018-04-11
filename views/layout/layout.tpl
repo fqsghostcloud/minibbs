@@ -29,9 +29,6 @@
       </div>
       <div Id="navbar" class="navbar-collapse collapse header-navbar">
         <ul class="nav navbar-nav navbar-right">
-          <li>
-            <a href="/about">公告</a>
-          </li>
           {{if .IsLogin}}
           <li>
             <a href="/user/{{.UserInfo.Username}}">
@@ -51,6 +48,7 @@
               {{if haspermission .UserInfo.Id "role:list"}}<li><a href="/role/list">角色管理</a></li>{{end}}
               {{if haspermission .UserInfo.Id "permission:list"}}<li><a href="/permission/list">权限管理</a></li>{{end}}
               {{if haspermission .UserInfo.Id "topic:manage"}}<li><a href="/topic/manage">发贴管理</a></li>{{end}}
+               {{if haspermission .UserInfo.Id "tag:manage"}}<li><a href="/tag/manage">标签管理</a></li>{{end}}
               <li><a href="/logout">退出</a></li>
             </ul>
           </li>

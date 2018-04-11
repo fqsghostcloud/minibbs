@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"minibbs/filters"
 	"minibbs/models"
 	"strconv"
@@ -87,22 +88,27 @@ func (c *TopicController) Edit() {
 func (c *TopicController) Update() {
 	flash := beego.NewFlash()
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	title, content, tid := c.Input().Get("title"), c.Input().Get("content"), c.Input().Get("tid")
+	title := c.Input().Get("title")
+	content := c.Input().Get("content")
+	tids := c.GetStrings("tids")
 	if len(title) == 0 || len(title) > 120 {
 		flash.Error("话题标题不能为空且不能超过120个字符")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
-	} else if len(tid) == 0 {
+	} else if len(tids) == 0 {
 		flash.Error("请选择话题标签")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
 	} else {
-		s, _ := strconv.Atoi(tid)
-		tag := models.Tag{Id: s}
+		models.TopicManager.DeleteTopicTagsByTopicId(id)
+		for _, v := range tids {
+			tagId, _ := strconv.Atoi(v)
+			models.TopicManager.SaveTopicTag(id, tagId)
+		}
+
 		topic := models.TopicManager.FindTopicById(id)
 		topic.Title = title
 		topic.Content = content
-		topic.Tags = append(topic.Tags, &tag)
 		models.TopicManager.UpdateTopic(&topic)
 		c.Redirect("/topic/"+strconv.Itoa(id), 302)
 	}
@@ -114,10 +120,21 @@ func (c *TopicController) Delete() {
 		topic := models.TopicManager.FindTopicById(id)
 		models.TopicManager.DeleteTopic(&topic)
 		models.ReplyManager.DeleteReplyByTopic(&topic)
+		_, user := filters.IsLogin(c.Ctx)
+		roles := models.RoleManager.FindRolesByUser(&user)
+
+		for _, v := range roles {
+			if v.Name == "管理员" || v.Name == "超级管理员" {
+				c.Redirect("/topic/manage", 302)
+				return
+			}
+		}
 		c.Redirect("/", 302)
+		return
 	} else {
 		c.Ctx.WriteString("话题不存在")
 	}
+	return
 }
 
 func (c *TopicController) Manage() {
@@ -132,4 +149,115 @@ func (c *TopicController) Manage() {
 	c.Data["Page"] = models.TopicManager.PageTopicList(pageNum, size)
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "topic/manage.tpl"
+}
+
+func (c *TopicController) TagManage() {
+	c.Data["PageTitle"] = "标签列表"
+	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
+
+	size, _ := beego.AppConfig.Int("page.size")
+	pageNum, _ := strconv.Atoi(c.Ctx.Input.Query("pageNum"))
+	if pageNum == 0 {
+		pageNum = 1
+	}
+	c.Data["Page"] = models.TagManager.PageTagList(pageNum, size)
+	c.Layout = "layout/layout.tpl"
+	c.TplName = "topic/manageTag.tpl"
+}
+
+func (c *TopicController) SaveTag() {
+	beego.ReadFromRequest(&c.Controller)
+	flash := beego.NewFlash()
+	tagName := c.Input().Get("tagName")
+	if tagName == "" {
+		flash.Error("标签不可以为空")
+		flash.Store(&c.Controller)
+		c.Redirect("/tag/manage/", 302)
+		return
+	}
+
+	if len(tagName) == 1 {
+		flash.Error("标签至少两个字符")
+		flash.Store(&c.Controller)
+		c.Redirect("/tag/manage/", 302)
+		return
+	}
+
+	tag := models.Tag{Name: tagName}
+
+	err := models.TagManager.SaveTag(&tag)
+	if err != nil {
+		fmt.Printf("\n save tag error[%s] \n", err.Error())
+		flash.Error("保存标签时发生错误")
+		flash.Store(&c.Controller)
+	}
+	c.Redirect("/tag/manage/", 302)
+	return
+}
+
+func (c *TopicController) UpdateTag() {
+	beego.ReadFromRequest(&c.Controller)
+	flash := beego.NewFlash()
+	tagName := c.Input().Get("tagName")
+	id, _ := strconv.Atoi(c.Input().Get("id"))
+
+	if tagName == "" {
+		flash.Error("标签不可以为空")
+		flash.Store(&c.Controller)
+		c.Redirect("/tag/manage/", 302)
+		return
+	}
+
+	if len(tagName) == 1 {
+		flash.Error("标签至少两个字符")
+		flash.Store(&c.Controller)
+		c.Redirect("/tag/manage/", 302)
+		return
+	}
+
+	tag, err := models.TagManager.FinTagById(id)
+	if err != nil {
+		fmt.Printf("\n update tag error[%s] \n", err.Error())
+		flash.Error("查询标签时发生错误")
+		flash.Store(&c.Controller)
+		c.Redirect("/tag/manage/", 302)
+		return
+	}
+
+	tag.Name = tagName
+
+	err = models.TagManager.UpdateTag(tag)
+	if err != nil {
+		fmt.Printf("\n update tag error[%s] \n", err.Error())
+		flash.Error("修改标签时发生错误")
+		flash.Store(&c.Controller)
+	}
+	c.Redirect("/tag/manage/", 302)
+	return
+}
+
+func (c *TopicController) DeleteTag() {
+	beego.ReadFromRequest(&c.Controller)
+	flash := beego.NewFlash()
+	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if id > 0 {
+		tag, _ := models.TagManager.FinTagById(id)
+		err := models.TagManager.DeleteTag(tag)
+		if err != nil {
+			fmt.Printf("\n delete tag error[%s] \n", err.Error())
+			flash.Error("删除标签时发生错误")
+			flash.Store(&c.Controller)
+			c.Redirect("/tag/manage/", 302)
+			return
+		}
+
+		flash.Success("删除成功")
+		flash.Store(&c.Controller)
+		c.Redirect("/tag/manage/", 302)
+		return
+
+	} else {
+		c.Ctx.WriteString("标签不存在")
+	}
+	return
 }
