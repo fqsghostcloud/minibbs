@@ -140,7 +140,6 @@ func (c *TopicController) Delete() {
 	if id > 0 {
 		topic := models.TopicManager.FindTopicById(id)
 		models.TopicManager.DeleteTopic(&topic)
-		models.ReplyManager.DeleteReplyByTopic(&topic)
 		_, user := filters.IsLogin(c.Ctx)
 		roles := models.RoleManager.FindRolesByUser(&user)
 
@@ -159,6 +158,7 @@ func (c *TopicController) Delete() {
 }
 
 func (c *TopicController) Manage() {
+	beego.ReadFromRequest(&c.Controller)
 	c.Data["PageTitle"] = "帖子列表"
 	isLogin, userInfo := filters.IsLogin(c.Ctx)
 	c.Data["IsLogin"] = isLogin
@@ -280,6 +280,16 @@ func (c *TopicController) DeleteTag() {
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
 		tag, _ := models.TagManager.FinTagById(id)
+		topicList := models.TopicManager.FindTopicByTag(tag)
+
+		//删除只有一个Tag的帖子
+		for _, v := range topicList {
+			tags := models.TagManager.FindTagsByTopic(&v)
+			if len(tags) == 1 {
+				models.TopicManager.DeleteTopic(&v)
+			}
+		}
+
 		err := models.TagManager.DeleteTag(tag)
 		if err != nil {
 			fmt.Printf("\n delete tag error[%s] \n", err.Error())
@@ -319,7 +329,7 @@ func (c *TopicController) UserTopic() {
 }
 
 func (c *TopicController) TopicApproval() {
-	beego.ReadFromRequest(&c.Controller)
+
 	flash := beego.NewFlash()
 	topicId, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 
@@ -332,7 +342,7 @@ func (c *TopicController) TopicApproval() {
 
 	topic := models.TopicManager.FindTopicById(topicId)
 	if topic.IsApproval == true {
-		flash.Notice("帖子已经审核通过")
+		flash.Success("帖子已经审核通过")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/manage/", 302)
 		return
@@ -349,7 +359,7 @@ func (c *TopicController) TopicApproval() {
 }
 
 func (c *TopicController) TopicNotApproval() {
-	beego.ReadFromRequest(&c.Controller)
+
 	flash := beego.NewFlash()
 	topicId, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 
@@ -362,7 +372,7 @@ func (c *TopicController) TopicNotApproval() {
 
 	topic := models.TopicManager.FindTopicById(topicId)
 	if topic.IsApproval == false {
-		flash.Notice("审核已经打回")
+		flash.Success("审核已经打回")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/manage/", 302)
 		return

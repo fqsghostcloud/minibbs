@@ -151,7 +151,7 @@ func (c *UserController) Update() {
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	roleIds := c.GetStrings("roleIds")
 	if id > 0 {
-		models.UserManager.DeleteUserRolesByUserID(id)
+		models.UserManager.DeleteUserRolesByUserId(id)
 		for _, v := range roleIds {
 			roleId, _ := strconv.Atoi(v)
 			models.UserManager.SaveUserRole(id, roleId)
@@ -167,9 +167,8 @@ func (c *UserController) Delete() {
 	if id > 0 {
 		ok, user := models.UserManager.FindUserByID(id)
 		if ok {
-			models.TopicManager.DeleteTopicByUser(&user)
-			models.ReplyManager.DeleteReplyByUser(&user)
 			models.UserManager.DeleteUser(&user)
+			models.UserManager.DeleteUserRolesByUserId(user.Id)
 		}
 		c.Redirect("/user/list", 302)
 	} else {

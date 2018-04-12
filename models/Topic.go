@@ -13,6 +13,7 @@ import (
 type TopicAPI interface {
 	SaveTopic(topic *Topic, tagsId []*Tag) int64
 	SaveTopicTag(topicId int, tagId int)
+	FindTopicByTag(tag *Tag) []Topic
 	FindTopicById(id int) Topic
 	FindTopicByName(name string) Topic
 	PageTopic(p int, size int, tag *Tag) utils.Page           // get  topic with tag
@@ -46,6 +47,17 @@ var TopicManager TopicAPI
 
 func init() {
 	TopicManager = new(Topic)
+}
+
+func (t *Topic) FindTopicByTag(tag *Tag) []Topic {
+	var topicList []Topic
+	o := orm.NewOrm()
+	_, err := o.QueryTable(Topic{}).Filter("Tags__Tag__Name", tag.Name).All(&topicList)
+	if err != nil {
+		fmt.Printf("\n find topic by tag error[%s] \n", err.Error())
+	}
+
+	return topicList
 }
 
 // SaveTopic .
@@ -173,7 +185,7 @@ func (t *Topic) UpdateTopic(topic *Topic) {
 // DeleteTopic .
 func (t *Topic) DeleteTopic(topic *Topic) {
 	o := orm.NewOrm()
-	o.Delete(topic)
+	o.QueryTable(Topic{}).Filter("Id", topic.Id).Delete()
 }
 
 // DeleteTopicByUser .

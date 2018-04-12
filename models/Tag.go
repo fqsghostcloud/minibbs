@@ -87,7 +87,7 @@ func (t *Tag) UpdateTag(tag *Tag) error {
 
 func (t *Tag) DeleteTag(tag *Tag) error {
 	o := orm.NewOrm()
-	_, err := o.Delete(tag)
+	_, err := o.QueryTable(Tag{}).Filter("Id", tag.Id).Delete()
 	if err != nil {
 		return err
 	}

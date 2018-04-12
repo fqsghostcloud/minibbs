@@ -1,6 +1,8 @@
 <div class="row">
   <div class="col-md-9">
     <div class="panel panel-default">
+     {{template "components/flash_error.tpl" .}}
+     {{template "components/flash_success.tpl" .}}
       <div class="panel-heading">
         帖子管理
         <span class="pull-right">{{.Page.TotalCount}}篇</span>

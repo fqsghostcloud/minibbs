@@ -157,7 +157,7 @@ func (c *IndexController) Register() {
 
 	flash.Success("注册成功")
 	flash.Store(&c.Controller)
-	c.Redirect("/register", http.StatusFound)
+	c.Redirect("/login", http.StatusFound)
 	return
 }
 

@@ -36,7 +36,7 @@ type API interface {
 	SaveUserRole(userID int, roleID int)
 	DeleteUser(user *User)
 	UpdateUser(user *User)
-	DeleteUserRolesByUserID(userID int)
+	DeleteUserRolesByUserId(userId int)
 
 	PageUser(p int, size int) utils.Page
 	FindPermissionByUserIDAndPermissionName(userID int, name string) bool
@@ -304,13 +304,16 @@ func (u *User) FindPermissionByUser(Id int) []*Permission {
 // DeleteUser .
 func (u *User) DeleteUser(user *User) {
 	o := orm.NewOrm()
-	o.Delete(user)
+	_, err := o.QueryTable(User{}).Filter("Id", user.Id).Delete()
+	if err != nil {
+		fmt.Printf("\n delete user error[%s] \n", err.Error())
+	}
 }
 
 // DeleteUserRolesByUserID .
-func (u *User) DeleteUserRolesByUserID(userID int) {
+func (u *User) DeleteUserRolesByUserId(userId int) {
 	o := orm.NewOrm()
-	o.Raw("delete from user_roles where user_id = ?", userID).Exec()
+	o.Raw("delete from user_roles where user_id = ?", userId).Exec()
 }
 
 // SaveUserRole .
