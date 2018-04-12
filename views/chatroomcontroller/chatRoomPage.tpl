@@ -7,16 +7,20 @@
             <h3>关于{{.TopicName}}--编号<span id="tid">{{.TopicId}}</span></h3>
             
 
-            <div class="container" style="background-color:#E2DFD2;width:600px;height:400px;overflow: scroll;">
+            <div class="container" style="background-color:#E2DFD2;width:600px;height:400px;overflow: auto;overflow-x:hidden">
               <h3>聊天历史</h3>
               <ul id="chatbox">
-                <li>欢迎你， <span id="uname">{{.UserName}}</span></li>
+              <li>欢迎你， <span id="uname">{{.UserName}}</span></li>
+                {{range .History}}
+                  {{range $name, $message := .}}
+                    <li>{{$name}}:{{$message}}</li>
+                  {{end}}
+                {{end}}
+                
               </ul>
             </div>
 
-
             <form class="form-horizontal" role="form">
-
              <div class="form-group">
                 <label for="firstname" class="col-sm-2 control-label">输入框</label>
                 <div class="col-sm-8">
@@ -25,11 +29,10 @@
              </div>
 
              <div class="form-group">
-             <div class="col-sm-offset-2 col-sm-10">
-             <button id="sendbtn" type="button" class="btn btn-default">发送</button>
+                <div class="col-sm-offset-2 col-sm-10">
+                  <button id="sendbtn" type="button" class="btn btn-default">发送</button>
+                </div>
              </div>
-             </div>
-
             </form>
           </div>
         </div>

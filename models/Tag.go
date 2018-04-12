@@ -15,7 +15,7 @@ type Tag struct {
 }
 
 type TagAPI interface {
-	FindAllTag() []Tag
+	FindAllTag(user *User) []Tag
 	FindTagsByTopic(topic *Topic) []Tag
 	FinTagById(id int) (*Tag, error)
 	PageTagList(p int, size int) utils.Page
@@ -31,12 +31,31 @@ func init() {
 	TagManager = new(Tag)
 }
 
-func (t *Tag) FindAllTag() []Tag {
+func (t *Tag) FindAllTag(user *User) []Tag {
 	o := orm.NewOrm()
-
 	var tags []Tag
-	o.QueryTable(Tag{}).All(&tags)
-	return tags
+
+	if user != nil {
+		isAdmin := false
+		roles := RoleManager.FindRolesByUser(user)
+		for _, v := range roles {
+			if v.Name == ADMIN {
+				isAdmin = true
+				break
+			}
+		}
+
+		if isAdmin {
+			o.QueryTable(Tag{}).All(&tags)
+			return tags
+		}
+		o.QueryTable(Tag{}).Exclude("Name", "公告").All(&tags)
+		return tags
+	} else {
+		o.QueryTable(Tag{}).All(&tags)
+		return tags
+	}
+
 }
 
 // FindTagsByTopic .

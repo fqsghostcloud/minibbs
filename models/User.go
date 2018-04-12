@@ -50,7 +50,6 @@ type User struct {
 	Token     string `orm:"unique"`
 	Image     string
 	Email     string
-	Url       string    `orm:"null"`
 	Signature string    `orm:"null;size(1000)"`
 	InTime    time.Time `orm:"auto_now_add;type(datetime)"`
 	Roles     []*Role   `orm:"rel(m2m)"`

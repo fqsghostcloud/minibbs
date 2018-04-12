@@ -30,7 +30,7 @@ func (c *IndexController) Index() {
 	c.Data["TagId"] = tagId
 	tag := models.Tag{Id: tagId}
 	c.Data["Page"] = models.TopicManager.PageTopic(page, size, &tag)
-	c.Data["Tags"] = models.TagManager.FindAllTag()
+	c.Data["Tags"] = models.TagManager.FindAllTag(nil)
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "index.tpl"
 }

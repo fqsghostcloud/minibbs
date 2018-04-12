@@ -15,9 +15,12 @@ type TopicController struct {
 
 func (c *TopicController) Create() {
 	beego.ReadFromRequest(&c.Controller)
-	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
+	isLogin, userInfo := filters.IsLogin(c.Controller.Ctx)
+	c.Data["IsLogin"] = isLogin
+	c.Data["UserInfo"] = userInfo
+
 	c.Data["PageTitle"] = "发布话题"
-	c.Data["Tags"] = models.TagManager.FindAllTag()
+	c.Data["Tags"] = models.TagManager.FindAllTag(&userInfo)
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "topic/create.tpl"
 }
@@ -76,26 +79,8 @@ func (c *TopicController) Edit() {
 
 		c.Data["IsLogin"] = isLogin
 		c.Data["UserInfo"] = currUser
-		// isAdmin := false
-
-		// currRoles := models.RoleManager.FindRolesByUser(&currUser)
-
-		// for _, v := range currRoles {
-		// 	if v.Name == models.ADMIN || v.Name == models.SUPERADMIN {
-		// 		isAdmin = true
-		// 	}
-		// }
-
-		// if !isAdmin {
-		// 	//whether is current user's topic
-		// 	topicUser := models.TopicManager.FindTopicById(id).User
-		// 	if topicUser.Username != currUser.Username {
-		// 		c.Ctx.WriteString("你无权限访问此页面")
-		// 	}
-		// }
-
 		c.Data["PageTitle"] = "编辑话题"
-		c.Data["Tags"] = models.TagManager.FindAllTag()
+		c.Data["Tags"] = models.TagManager.FindAllTag(&currUser)
 		topicTags := models.TagManager.FindTagsByTopic(&topic)
 		c.Data["Topic"] = topic
 		c.Data["TopicTags"] = topicTags

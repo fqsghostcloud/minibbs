@@ -18,6 +18,22 @@ type ChatRoomController struct {
 	beego.Controller
 }
 
+type Chatter struct {
+	Name    string
+	TopicId string
+	Conn    *websocket.Conn // Only for WebSocket users; otherwise nil.
+}
+
+type ChatRoomCh struct {
+	comeinChatterCh chan Chatter
+	exitChatterCh   chan string
+	commonInfoCh    chan models.Event
+	chatterLists    *list.List
+	history         []map[string]string // user news history
+}
+
+var chatroomMap = make(map[string]*ChatRoomCh)
+
 // Get method handles GET requests for WebSocketController.
 func (c *ChatRoomController) ChatRoomPage() {
 
@@ -28,7 +44,7 @@ func (c *ChatRoomController) ChatRoomPage() {
 		return
 	}
 
-	//check usename is current user
+	//check user is current user
 	_, currUser := filters.IsLogin(c.Ctx)
 	if currUser.Username != uname {
 		c.Redirect("/", 302)
@@ -37,21 +53,26 @@ func (c *ChatRoomController) ChatRoomPage() {
 
 	topicId, err := strconv.Atoi(tid)
 	if err != nil {
-		beego.Error("get topic id for chatroon error[%s]", err.Error())
+		fmt.Printf("get topic id for chatroon error[%s]", err.Error())
 		c.Ctx.WriteString("发生错误，请联系管理员")
 	}
 
 	topic := models.TopicManager.FindTopicById(topicId)
 
-	c.Data["UserInfo"] = currUser
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
 	c.Data["PageTitle"] = "聊天室"
 	c.Data["UserName"] = uname
 	c.Data["TopicName"] = topic.Title
 	c.Data["TopicId"] = topicId
+
+	// 添加历史信息
+	if chatroomMap[tid] != nil && len(chatroomMap[tid].history) > 0 {
+		c.Data["History"] = chatroomMap[tid].history
+	}
+
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "chatroomcontroller/chatRoomPage.tpl"
-	
+
 	c.LayoutSections = make(map[string]string)
 	c.LayoutSections["ChatRoomScript"] = "chatroomcontroller/ChatRoomScript.tpl"
 }
@@ -87,6 +108,8 @@ func (c *ChatRoomController) Chat() {
 			commonInfoCh: make(chan models.Event, 10),
 
 			chatterLists: list.New(),
+
+			history: []map[string]string{},
 		}
 
 		chatroomMap[tid] = chatroomch
@@ -97,7 +120,7 @@ func (c *ChatRoomController) Chat() {
 
 	// Join chat room.
 	Join(chatroomMap[tid], chatter)
-	defer Leave(uname, tid)
+	defer Leave(uname, tid, chatroomMap)
 
 	// Message receive loop.
 	for {
@@ -110,7 +133,8 @@ func (c *ChatRoomController) Chat() {
 		chatroomMap[tid].commonInfoCh <- newEvent(models.EVENT_MESSAGE, uname, string(p))
 	}
 
-	c.TplName = "blank.tpl"
+	c.Layout = "layout/layout.tpl"
+	c.TplName = "chatroomcontroller/chat.tpl"
 
 }
 
@@ -122,11 +146,18 @@ func broadcastWebSocket(event models.Event, pChatroomch *ChatRoomCh) {
 		return
 	}
 
+	userMessage := map[string]string{}
+	if len(event.Content) > 0 {
+		userMessage[event.User] = event.Content
+		pChatroomch.history = append(pChatroomch.history, userMessage)
+	}
+
 	for chatterItem := pChatroomch.chatterLists.Front(); chatterItem != nil; chatterItem = chatterItem.Next() {
 		// Immediately send event to WebSocket users.
 		ws := chatterItem.Value.(Chatter).Conn //断言
 		if ws != nil {
-			if ws.WriteMessage(websocket.TextMessage, data) != nil {
+			err := ws.WriteMessage(websocket.TextMessage, data)
+			if err != nil {
 				// User disconnected.
 				pChatroomch.exitChatterCh <- chatterItem.Value.(Chatter).Name
 			}
@@ -142,24 +173,12 @@ func Join(chatroomch *ChatRoomCh, chatter Chatter) {
 	chatroomch.comeinChatterCh <- chatter
 }
 
-func Leave(user string, topicId string) {
+func Leave(user string, topicId string, chatroomMap map[string]*ChatRoomCh) {
+	if chatroomMap[topicId].chatterLists.Len() == 1 {
+		chatroomMap[topicId].history = nil
+	}
 	chatroomMap[topicId].exitChatterCh <- user
 }
-
-type Chatter struct {
-	Name    string
-	TopicId string
-	Conn    *websocket.Conn // Only for WebSocket users; otherwise nil.
-}
-
-type ChatRoomCh struct {
-	comeinChatterCh chan Chatter
-	exitChatterCh   chan string
-	commonInfoCh    chan models.Event
-	chatterLists    *list.List
-}
-
-var chatroomMap = make(map[string]*ChatRoomCh)
 
 // This function handles all incoming chan messages.
 func chatroom(v *ChatRoomCh) {
@@ -182,17 +201,17 @@ func chatroom(v *ChatRoomCh) {
 			if event.Type == models.EVENT_MESSAGE {
 				beego.Info("Message from", event.User, ";Content:", event.Content)
 			}
-		case unsub := <-v.exitChatterCh:
+		case exitName := <-v.exitChatterCh:
 			for sub := v.chatterLists.Front(); sub != nil; sub = sub.Next() {
-				if sub.Value.(Chatter).Name == unsub {
+				if sub.Value.(Chatter).Name == exitName {
 					v.chatterLists.Remove(sub)
 					// Clone connection.
 					ws := sub.Value.(Chatter).Conn
 					if ws != nil {
 						ws.Close()
-						beego.Error("WebSocket closed:", unsub)
+						beego.Error("WebSocket closed:", exitName)
 					}
-					v.commonInfoCh <- newEvent(models.EVENT_LEAVE, unsub, "") // Publish a LEAVE event.
+					v.commonInfoCh <- newEvent(models.EVENT_LEAVE, exitName, "") // Publish a LEAVE event.
 					break
 				}
 			}

@@ -38,7 +38,7 @@ func (c *UserController) ToSetting() {
 
 func (c *UserController) Setting() {
 	flash := beego.NewFlash()
-	email, url, signature := c.Input().Get("email"), c.Input().Get("url"), c.Input().Get("signature")
+	email, signature := c.Input().Get("email"), c.Input().Get("signature")
 	if len(email) > 0 {
 		ok, _ := regexp.MatchString("^([a-z0-9A-Z]+[-|_|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$", email)
 		if !ok {
@@ -56,7 +56,6 @@ func (c *UserController) Setting() {
 	}
 	_, user := filters.IsLogin(c.Ctx)
 	user.Email = email
-	user.Url = url
 	user.Signature = signature
 	models.UserManager.UpdateUser(&user)
 	flash.Success("更新资料成功")

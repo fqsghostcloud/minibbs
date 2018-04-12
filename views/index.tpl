@@ -3,9 +3,9 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <ul class="nav nav-pills">
-          <li id="tab_0"><a href="/?tab=all">全部</a></li>
+          <li id="tab_0" style="font-size:20px"><a href="/?tab=all">全部</a></li>
           {{range .Tags}}
-          <li id="tab_{{.Id}}"><a href="/?tagId={{.Id}}">{{.Name}}</a></li>
+          <li id="tab_{{.Id}}" style="font-size:20px"><a href="/?tagId={{.Id}}">{{.Name}}</a></li>
           {{end}}
         </ul>
       </div>
