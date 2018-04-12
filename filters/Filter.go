@@ -1,9 +1,9 @@
 package filters
 
 import (
-	"fmt"
 	"minibbs/models"
 	"regexp"
+	"strconv"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -25,7 +25,6 @@ var HasPermission = func(ctx *context.Context) {
 		ctx.Redirect(302, "/login")
 	} else {
 		permissions := models.UserManager.FindPermissionByUser(user.Id)
-		fmt.Printf("permission{%v}\n", permissions)
 		url := ctx.Request.RequestURI
 		beego.Debug("url: ", url)
 		var flag = false
@@ -45,5 +44,28 @@ var FilterUser = func(ctx *context.Context) {
 	ok, _ := IsLogin(ctx)
 	if !ok {
 		ctx.Redirect(302, "/login")
+	}
+}
+
+var IsTopicUser = func(ctx *context.Context) {
+	topicId, _ := strconv.Atoi(ctx.Input.Param(":id"))
+	_, currUser := IsLogin(ctx)
+
+	isAdmin := false
+
+	currRoles := models.RoleManager.FindRolesByUser(&currUser)
+
+	for _, v := range currRoles {
+		if v.Name == models.ADMIN {
+			isAdmin = true
+		}
+	}
+
+	if !isAdmin {
+		//whether is current user's topic
+		topicUser := models.TopicManager.FindTopicById(topicId).User
+		if topicUser.Username != currUser.Username {
+			ctx.WriteString("你无权限访问此页面")
+		}
 	}
 }

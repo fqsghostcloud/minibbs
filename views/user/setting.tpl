@@ -16,11 +16,11 @@
         <form action="/user/setting" method="post">
           <div class="form-group">
             <label for="username">昵称</label>
-            <input type="text" disabled="" class="form-control" id="username" value="{{.UserInfo.Username}}">
+            <input type="text" disabled="disabled" class="form-control" id="username" value="{{.UserInfo.Username}}">
           </div>
           <div class="form-group">
             <label for="email">邮箱</label>
-            <input type="text" class="form-control" name="email" id="email" value="{{.UserInfo.Email}}">
+            <input type="text" disabled="disabled" class="form-control" name="email" id="email" value="{{.UserInfo.Email}}">
           </div>
           <div class="form-group">
             <label for="Url">个人主页</label>

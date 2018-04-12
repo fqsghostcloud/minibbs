@@ -45,7 +45,6 @@ func (c *ReplyController) Up() {
 			models.DeleteReplyUpLog(&replyUpLog)
 			models.ReplyManager.DownReply(&reply)
 			result.Code = 201
-			// result.Description = "你已取消点赞"
 		} else {
 			replyUpLog.User = &user
 			replyUpLog.Reply = &reply
@@ -53,8 +52,8 @@ func (c *ReplyController) Up() {
 			models.ReplyManager.UpReply(&reply)
 		}
 	} else {
-		result.Code = 201
-		result.Description = "失败1"
+		result.Code = 202
+		result.Description = "操作失败"
 	}
 	c.Data["json"] = &result
 	c.ServeJSON()

@@ -31,14 +31,18 @@ func init() {
 	beego.Router("/topic/:id([0-9]+)", &controllers.TopicController{}, "GET:Detail")
 
 	beego.InsertFilter("/topic/edit/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
+	beego.InsertFilter("/topic/edit/:id([0-9]+)", beego.BeforeRouter, filters.IsTopicUser)
 	beego.Router("/topic/edit/:id([0-9]+)", &controllers.TopicController{}, "GET:Edit")
 	beego.Router("/topic/edit/:id([0-9]+)", &controllers.TopicController{}, "POST:Update")
 
 	beego.InsertFilter("/topic/delete/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
+	beego.InsertFilter("/topic/delete/:id([0-9]+)", beego.BeforeRouter, filters.IsTopicUser)
 	beego.Router("/topic/delete/:id([0-9]+)", &controllers.TopicController{}, "GET:Delete")
 	//发帖管理
 	beego.InsertFilter("/topic/manage", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/manage", &controllers.TopicController{}, "GET:Manage")
+	beego.Router("/topic/manage/:id([0-9]+)/approval", &controllers.TopicController{}, "GET:TopicApproval")
+	beego.Router("/topic/manage/:id([0-9]+)/notapproval", &controllers.TopicController{}, "GET:TopicNotApproval")
 
 	//标签管理
 	beego.InsertFilter("/tag/manage", beego.BeforeRouter, filters.HasPermission)
@@ -73,12 +77,13 @@ func init() {
 	beego.InsertFilter("/user/list", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/user/list", &controllers.UserController{}, "GET:List")
 
-	beego.InsertFilter("/user/delete/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
-	beego.Router("/user/delete/:id([0-9]+)", &controllers.UserController{}, "GET:Delete")
-
+	//用户管理
 	beego.InsertFilter("/user/edit/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/user/edit/:id([0-9]+)", &controllers.UserController{}, "GET:Edit")
 	beego.Router("/user/edit/:id([0-9]+)", &controllers.UserController{}, "POST:Update")
+
+	beego.InsertFilter("/user/delete/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
+	beego.Router("/user/delete/:id([0-9]+)", &controllers.UserController{}, "GET:Delete")
 
 	beego.Router("/user/:username/topics", &controllers.TopicController{}, "GET:UserTopic")
 	beego.Router("/user/:username/replies", &controllers.ReplyController{}, "GET:UserReplay")

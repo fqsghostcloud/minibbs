@@ -9,6 +9,11 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
+const (
+	ADMIN = "管理员"
+	USER  = "普通用户"
+)
+
 // API user api
 type API interface {
 	Login(username string, password string) (bool, *User, error)
@@ -24,6 +29,7 @@ type API interface {
 	FindUserByToken(token string) (bool, User)
 	FindUserByUserName(username string) (bool, User)
 	FindUserByUserEmail(email string) (bool, User)
+	FindUserByTopic(topic *Topic) (bool, User)
 	FindPermissionByUser(id int) []*Permission
 
 	SaveUser(user *User) error
@@ -59,6 +65,17 @@ var UserManager API
 
 func init() {
 	UserManager = new(User)
+}
+
+func (u *User) FindUserByTopic(topic *Topic) (bool, User) {
+	o := orm.NewOrm()
+	user := User{}
+	err := o.QueryTable(Topic{}).Filter("User", topic.Id).One(&user)
+	if err != nil {
+		return false, user
+	}
+
+	return true, user
 }
 
 // ActiveAccount .

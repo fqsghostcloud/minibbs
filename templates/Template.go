@@ -28,9 +28,23 @@ func GetTopicTags(topicName string) []models.Tag {
 	return models.TagManager.FindTagsByTopic(&topic)
 }
 
+func IsAdmin(user models.User) bool {
+	isAdmin := false
+	roles := models.RoleManager.FindRolesByUser(&user)
+	for _, v := range roles {
+		if v.Name == models.ADMIN {
+			isAdmin = true
+			break
+		}
+	}
+
+	return isAdmin
+}
+
 func init() {
 	beego.AddFuncMap("timeago", FormatTime)
 	beego.AddFuncMap("markdown", Markdown)
 	beego.AddFuncMap("haspermission", HasPermission)
 	beego.AddFuncMap("getTopicTags", GetTopicTags)
+	beego.AddFuncMap("isAdmin", IsAdmin)
 }

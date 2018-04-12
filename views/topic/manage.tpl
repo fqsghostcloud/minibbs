@@ -12,7 +12,20 @@
           <tr>
             <td><a href="/topic/{{.Id}}">{{.Title}}</a></td>
             <td>
-              <a href="/topic/edit/{{.Id}}" class="btn btn-xs btn-warning">修改帖子</a>
+              {{if $.UserInfo | isAdmin}} 
+                {{if .IsApproval}}
+                  <a href="/topic/manage/{{.Id}}/notapproval" class="btn btn-xs btn-danger">打回帖子</a>
+                {{else}}
+                  <a href="/topic/manage/{{.Id}}/approval" class="btn btn-xs btn-success">允许发布</a>
+                {{end}}
+              {{else}}
+                {{if .IsApproval}}
+                  <span class="label label-success">审批通过</span>
+                {{else}}
+                  <span class="label label-warning">审批未通过</span>
+                {{end}}
+              {{end}}   
+             
               <a href="javascript:if(confirm('确认删除吗?')) location.href='/topic/delete/{{.Id}}'" class="btn btn-xs btn-danger">删除</a>
             </td>
           </tr>

@@ -72,7 +72,28 @@ func (c *TopicController) Edit() {
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
 		topic := models.TopicManager.FindTopicById(id)
-		c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Controller.Ctx)
+		isLogin, currUser := filters.IsLogin(c.Controller.Ctx)
+
+		c.Data["IsLogin"] = isLogin
+		c.Data["UserInfo"] = currUser
+		// isAdmin := false
+
+		// currRoles := models.RoleManager.FindRolesByUser(&currUser)
+
+		// for _, v := range currRoles {
+		// 	if v.Name == models.ADMIN || v.Name == models.SUPERADMIN {
+		// 		isAdmin = true
+		// 	}
+		// }
+
+		// if !isAdmin {
+		// 	//whether is current user's topic
+		// 	topicUser := models.TopicManager.FindTopicById(id).User
+		// 	if topicUser.Username != currUser.Username {
+		// 		c.Ctx.WriteString("你无权限访问此页面")
+		// 	}
+		// }
+
 		c.Data["PageTitle"] = "编辑话题"
 		c.Data["Tags"] = models.TagManager.FindAllTag()
 		topicTags := models.TagManager.FindTagsByTopic(&topic)
@@ -124,7 +145,7 @@ func (c *TopicController) Delete() {
 		roles := models.RoleManager.FindRolesByUser(&user)
 
 		for _, v := range roles {
-			if v.Name == "管理员" || v.Name == "超级管理员" {
+			if v.Name == "管理员" {
 				c.Redirect("/topic/manage", 302)
 				return
 			}
@@ -139,14 +160,31 @@ func (c *TopicController) Delete() {
 
 func (c *TopicController) Manage() {
 	c.Data["PageTitle"] = "帖子列表"
-	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
+	isLogin, userInfo := filters.IsLogin(c.Ctx)
+	c.Data["IsLogin"] = isLogin
+	c.Data["UserInfo"] = userInfo
+	roles := models.RoleManager.FindRolesByUser(&userInfo)
+	isAdmin := false
+
+	for _, v := range roles {
+		if v.Name == models.ADMIN {
+			isAdmin = true
+			break
+		}
+	}
 
 	size, _ := beego.AppConfig.Int("page.size")
 	pageNum, _ := strconv.Atoi(c.Ctx.Input.Query("pageNum"))
 	if pageNum == 0 {
 		pageNum = 1
 	}
-	c.Data["Page"] = models.TopicManager.PageTopicList(pageNum, size)
+
+	if isAdmin {
+		c.Data["Page"] = models.TopicManager.PageTopicList(pageNum, size, nil)
+	} else {
+		c.Data["Page"] = models.TopicManager.PageTopicList(pageNum, size, &userInfo)
+	}
+
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "topic/manage.tpl"
 }
@@ -278,4 +316,64 @@ func (c *TopicController) UserTopic() {
 	}
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "user/allTopic.tpl"
+}
+
+func (c *TopicController) TopicApproval() {
+	beego.ReadFromRequest(&c.Controller)
+	flash := beego.NewFlash()
+	topicId, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+
+	if topicId < 0 {
+		flash.Error("帖子不存在")
+		flash.Store(&c.Controller)
+		c.Redirect("/topic/manage/", 302)
+		return
+	}
+
+	topic := models.TopicManager.FindTopicById(topicId)
+	if topic.IsApproval == true {
+		flash.Notice("帖子已经审核通过")
+		flash.Store(&c.Controller)
+		c.Redirect("/topic/manage/", 302)
+		return
+	}
+
+	topic.IsApproval = true
+
+	models.TopicManager.UpdateTopic(&topic)
+	flash.Success("审核通过")
+	flash.Store(&c.Controller)
+	c.Redirect("/topic/manage/", 302)
+	return
+
+}
+
+func (c *TopicController) TopicNotApproval() {
+	beego.ReadFromRequest(&c.Controller)
+	flash := beego.NewFlash()
+	topicId, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+
+	if topicId < 0 {
+		flash.Error("帖子不存在")
+		flash.Store(&c.Controller)
+		c.Redirect("/topic/manage/", 302)
+		return
+	}
+
+	topic := models.TopicManager.FindTopicById(topicId)
+	if topic.IsApproval == false {
+		flash.Notice("审核已经打回")
+		flash.Store(&c.Controller)
+		c.Redirect("/topic/manage/", 302)
+		return
+	}
+
+	topic.IsApproval = false
+
+	models.TopicManager.UpdateTopic(&topic)
+	flash.Success("审核打回成功")
+	flash.Store(&c.Controller)
+	c.Redirect("/topic/manage/", 302)
+	return
+
 }

@@ -15,8 +15,8 @@ type TopicAPI interface {
 	SaveTopicTag(topicId int, tagId int)
 	FindTopicById(id int) Topic
 	FindTopicByName(name string) Topic
-	PageTopic(p int, size int, tag *Tag) utils.Page // get  topic with tag
-	PageTopicList(p int, size int) utils.Page       // just get topic list without tag
+	PageTopic(p int, size int, tag *Tag) utils.Page           // get  topic with tag
+	PageTopicList(page int, size int, owner *User) utils.Page // just get topic list without tag
 	IncrView(topic *Topic)
 	IncrReplyCount(topic *Topic)
 	ReduceReplyCount(topic *Topic)
@@ -38,6 +38,7 @@ type Topic struct {
 	LastReplyUser *User     `orm:"rel(fk);null"`
 	LastReplyTime time.Time `orm:"auto_now_add;type(datetime)"`
 	Tags          []*Tag    `orm:"rel(m2m)"`
+	IsApproval    bool      `orm:"default(false)"`
 }
 
 // TopicManager manager topic api
@@ -82,17 +83,23 @@ func (t *Topic) FindTopicByName(name string) Topic {
 	return topic
 }
 
-func (t *Topic) PageTopicList(p int, size int) utils.Page {
+func (t *Topic) PageTopicList(page int, size int, owner *User) utils.Page {
 	o := orm.NewOrm()
 	var topic Topic
 	var list []Topic
 
 	qs := o.QueryTable(topic)
-	countStr, _ := qs.Limit(-1).Count()
-	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
+	var countStr int64
+	if owner == nil {
+		countStr, _ = qs.Limit(-1).Count()
+		qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&list)
+	} else {
+		countStr, _ = qs.Filter("User", owner).Limit(-1).Count()
+		qs.Filter("User", owner).RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&list)
+	}
 
 	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
-	return utils.PageUtil(count, p, size, list)
+	return utils.PageUtil(count, page, size, list)
 }
 
 // PageTopic .
@@ -105,8 +112,8 @@ func (t *Topic) PageTopic(p int, size int, tag *Tag) utils.Page {
 	if tag.Id > 0 {
 		qs = qs.Filter("Tags__Tag__Id", tag.Id)
 	}
-	countStr, _ := qs.Limit(-1).Count()
-	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
+	countStr, _ := qs.Filter("isApproval", true).Limit(-1).Count()
+	qs.Filter("isApproval", true).RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
 
 	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
 	return utils.PageUtil(count, p, size, list)

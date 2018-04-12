@@ -46,8 +46,7 @@ LOCK TABLES `role` WRITE;
 
 INSERT INTO `role` (`id`, `name`)
 VALUES
-	(3,'超级管理员'),
-	(4,'管理员'),
+    (3,'管理员'), 
 	(5,'普通用户');
 
 UNLOCK TABLES;
