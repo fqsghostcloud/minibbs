@@ -26,7 +26,10 @@ VALUES
 	(22,12,'permission:add','添加权限','/permission/add'),
 	(23,12,'permission:edit','编辑权限','/permission/edit/[0-9]+'),
 	(24,12,'permission:delete','删除权限','/permission/delete/[0-9]+'),
-	(25,12,'topic:manage','帖子管理','/topic/manage');
+	(25,12,'topic:manage','帖子管理','/topic/manage'),
+	(26,12,'topic:edit','公告编辑','/about/edit'),
+	(27,1,'topic:chat','聊天室','/topic/join/ws'),
+	(28,1,'tag:manage','标签管理','/tag/manage');
 
 UNLOCK TABLES;
 

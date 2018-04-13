@@ -150,6 +150,7 @@ func (c *TopicController) Manage() {
 	c.Data["UserInfo"] = userInfo
 	roles := models.RoleManager.FindRolesByUser(&userInfo)
 	isAdmin := false
+	topicName := c.Input().Get("topicName")
 
 	for _, v := range roles {
 		if v.Name == models.ADMIN {
@@ -165,9 +166,9 @@ func (c *TopicController) Manage() {
 	}
 
 	if isAdmin {
-		c.Data["Page"] = models.TopicManager.PageTopicList(pageNum, size, nil)
+		c.Data["Page"] = models.TopicManager.PageTopicList(pageNum, size, nil, topicName)
 	} else {
-		c.Data["Page"] = models.TopicManager.PageTopicList(pageNum, size, &userInfo)
+		c.Data["Page"] = models.TopicManager.PageTopicList(pageNum, size, &userInfo, topicName)
 	}
 
 	c.Layout = "layout/layout.tpl"

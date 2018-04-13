@@ -16,8 +16,8 @@ type TopicAPI interface {
 	FindTopicByTag(tag *Tag) []Topic
 	FindTopicById(id int) Topic
 	FindTopicByName(name string) Topic
-	PageTopic(p int, size int, tag *Tag) utils.Page           // get  topic with tag
-	PageTopicList(page int, size int, owner *User) utils.Page // just get topic list without tag
+	PageTopic(p int, size int, tag *Tag) utils.Page                              // get  topic with tag
+	PageTopicList(page int, size int, owner *User, searchName string) utils.Page // just get topic list without tag
 	IncrView(topic *Topic)
 	IncrReplyCount(topic *Topic)
 	ReduceReplyCount(topic *Topic)
@@ -95,7 +95,7 @@ func (t *Topic) FindTopicByName(name string) Topic {
 	return topic
 }
 
-func (t *Topic) PageTopicList(page int, size int, owner *User) utils.Page {
+func (t *Topic) PageTopicList(page int, size int, owner *User, searchName string) utils.Page {
 	o := orm.NewOrm()
 	var topic Topic
 	var list []Topic
@@ -103,11 +103,23 @@ func (t *Topic) PageTopicList(page int, size int, owner *User) utils.Page {
 	qs := o.QueryTable(topic)
 	var countStr int64
 	if owner == nil {
-		countStr, _ = qs.Limit(-1).Count()
-		qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&list)
+		if searchName == "" {
+			countStr, _ = qs.Limit(-1).Count()
+			qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&list)
+		} else {
+			countStr, _ = qs.Filter("Title__contains", searchName).Limit(-1).Count()
+			qs.Filter("Title__contains", searchName).RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&list)
+		}
+
 	} else {
-		countStr, _ = qs.Filter("User", owner).Limit(-1).Count()
-		qs.Filter("User", owner).RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&list)
+		if searchName == "" {
+			countStr, _ = qs.Filter("User", owner).Limit(-1).Count()
+			qs.Filter("User", owner).RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&list)
+		} else {
+			countStr, _ = qs.Filter("User", owner).Filter("Title__contains", searchName).Limit(-1).Count()
+			qs.Filter("User", owner).Filter("Title__contains", searchName).RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&list)
+		}
+
 	}
 
 	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))

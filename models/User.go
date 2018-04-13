@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/astaxie/beego/orm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -38,8 +39,12 @@ type API interface {
 	UpdateUser(user *User)
 	DeleteUserRolesByUserId(userId int)
 
-	PageUser(p int, size int) utils.Page
+	PageUser(p int, size int, searchName string) utils.Page
 	FindPermissionByUserIDAndPermissionName(userID int, name string) bool
+
+	//密码储存加密
+	EncodePwd(pwd string) string
+	CheckPwd(encodePwd string, pwd string) bool
 }
 
 // User ..
@@ -64,6 +69,23 @@ var UserManager API
 
 func init() {
 	UserManager = new(User)
+}
+
+func (u *User) EncodePwd(pwd string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return string(hash)
+}
+
+func (u *User) CheckPwd(encodePwd string, pwd string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(encodePwd), []byte(pwd))
+	if err == nil {
+		return true
+	}
+	return false
 }
 
 func (u *User) FindUserByTopic(topic *Topic) (bool, User) {
@@ -242,8 +264,16 @@ func (u *User) Login(username string, password string) (bool, *User, error) {
 
 	o := orm.NewOrm()
 	var user User
-	err := o.QueryTable(user).Filter("Username", username).Filter("Password", password).One(&user)
-	return err != orm.ErrNoRows, &user, nil
+	err := o.QueryTable(user).Filter("Username", username).One(&user)
+	if err != nil {
+		fmt.Printf("\n query user error[%s] \n", err.Error())
+	}
+
+	if UserManager.CheckPwd(user.Password, password) {
+		return true, &user, nil
+	}
+
+	return false, &user, fmt.Errorf("用户名或密码错误")
 }
 
 // FindUserByUserName .
@@ -264,6 +294,8 @@ func (u *User) FindUserByUserEmail(email string) (bool, User) {
 
 // SaveUser .
 func (u *User) SaveUser(user *User) error {
+
+	user.Password = u.EncodePwd(user.Password) // 密码储存加密
 	o := orm.NewOrm()
 	_, err := o.Insert(user)
 	return err
@@ -276,15 +308,23 @@ func (u *User) UpdateUser(user *User) {
 }
 
 // PageUser .
-func (u *User) PageUser(p int, size int) utils.Page {
+func (u *User) PageUser(p int, size int, searchName string) utils.Page {
 	o := orm.NewOrm()
 	var user User
 	var list []User
 	qs := o.QueryTable(user)
-	count, _ := qs.Limit(-1).Count()
-	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
-	c, _ := strconv.Atoi(strconv.FormatInt(count, 10))
-	return utils.PageUtil(c, p, size, list)
+	if searchName == "" {
+		count, _ := qs.Limit(-1).Count()
+		qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
+		c, _ := strconv.Atoi(strconv.FormatInt(count, 10))
+		return utils.PageUtil(c, p, size, list)
+	} else {
+		count, _ := qs.Filter("Username__contains", searchName).Limit(-1).Count()
+		qs.Filter("Username__contains", searchName).RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
+		c, _ := strconv.Atoi(strconv.FormatInt(count, 10))
+		return utils.PageUtil(c, p, size, list)
+	}
+
 }
 
 // FindPermissionByUser .

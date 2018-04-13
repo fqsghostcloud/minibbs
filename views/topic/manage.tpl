@@ -3,6 +3,14 @@
     <div class="panel panel-default">
      {{template "components/flash_error.tpl" .}}
      {{template "components/flash_success.tpl" .}}
+     <div class="panel-heading">
+        <form class="form-inline" role="form" action="/topic/manage" method="get">
+          <div class="form-group">
+            <input type="text" class="form-control" name="topicName" placeholder="请输入帖子名称">
+          </div>
+          <button type="submit" class="btn btn-default">搜索</button>
+        </form>
+      </div>
       <div class="panel-heading">
         帖子管理
         <span class="pull-right">{{.Page.TotalCount}}篇</span>

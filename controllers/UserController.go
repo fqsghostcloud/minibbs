@@ -114,12 +114,14 @@ func (c *UserController) UpdateAvatar() {
 func (c *UserController) List() {
 	c.Data["PageTitle"] = "用户列表"
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
-	p, _ := strconv.Atoi(c.Ctx.Input.Query("p"))
-	if p == 0 {
-		p = 1
+	page, _ := strconv.Atoi(c.Ctx.Input.Query("page"))
+	searchName := c.Input().Get("searchName")
+
+	if page == 0 {
+		page = 1
 	}
 	size, _ := beego.AppConfig.Int("page.size")
-	c.Data["Page"] = models.UserManager.PageUser(p, size)
+	c.Data["Page"] = models.UserManager.PageUser(page, size, searchName)
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "user/list.tpl"
 }
