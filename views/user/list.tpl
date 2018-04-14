@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-md-9">
-    <div class="panel panel-default">
+    <div class="panel panel-default" style="height:600px">
     <div class="panel-heading">
         <form class="form-inline" role="form" action="/user/list" method="get">
           <div class="form-group">

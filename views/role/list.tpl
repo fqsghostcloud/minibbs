@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-md-9">
-    <div class="panel panel-default">
+    <div class="panel panel-default" style="height:600px">
       <div class="panel-heading">
         角色管理
         <a href="/role/add" class="pull-right">添加角色</a>

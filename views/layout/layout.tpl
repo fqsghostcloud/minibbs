@@ -19,7 +19,7 @@
       <div class="navbar-header">
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
                 aria-expanded="false" aria-controls="navbar">
-          <span class="sr-only">Toggle navigation</span>
+          <span c1lass="sr-only">Toggle navigation</span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
@@ -63,7 +63,7 @@
     {{.LayoutContent}}
   </div>
 </div>
-<div class="container">
+  <div class="container">
   <br>
   <div class="text-center">
     <a>Mini社区</a>

@@ -13,7 +13,6 @@
         <div class="media-heading">
           <a href="/user/{{.Topic.User.Username}}">{{.Topic.User.Username}}</a>
         </div>
-        {{if .Topic.User.Url}}<a href="{{.Topic.User.Url}}" target="_blank">{{.Topic.User.Url}}</a>{{end}}
       </div>
       {{if .Topic.User.Signature}}
       <div style="color: #7A7A7A; font-size: 12px; margin-top:5px;">
