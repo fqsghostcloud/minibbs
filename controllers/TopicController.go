@@ -38,10 +38,10 @@ func (c *TopicController) Save() {
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/create", 302)
 	} else {
-		var tags []*models.Tag
+		var tags []models.Tag
 		for _, strid := range tids {
 			id, _ := strconv.Atoi(strid)
-			tags = append(tags, &models.Tag{Id: id})
+			tags = append(tags, models.Tag{Id: id})
 		}
 
 		_, user := filters.IsLogin(c.Ctx)
@@ -125,6 +125,7 @@ func (c *TopicController) Delete() {
 	if id > 0 {
 		topic := models.TopicManager.FindTopicById(id)
 		models.TopicManager.DeleteTopic(&topic)
+		models.TopicManager.DeleteTopicTagsByTopicId(id)
 		_, user := filters.IsLogin(c.Ctx)
 		roles := models.RoleManager.FindRolesByUser(&user)
 

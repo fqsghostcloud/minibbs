@@ -11,7 +11,7 @@ import (
 
 // TopicAPI api for topic
 type TopicAPI interface {
-	SaveTopic(topic *Topic, tagsId []*Tag) int64
+	SaveTopic(topic *Topic, tagsId []Tag) int64
 	SaveTopicTag(topicId int, tagId int)
 	FindTopicByTag(tag *Tag) []Topic
 	FindTopicById(id int) Topic
@@ -61,7 +61,7 @@ func (t *Topic) FindTopicByTag(tag *Tag) []Topic {
 }
 
 // SaveTopic .
-func (t *Topic) SaveTopic(topic *Topic, tags []*Tag) int64 {
+func (t *Topic) SaveTopic(topic *Topic, tags []Tag) int64 {
 	o := orm.NewOrm()
 	id, err := o.Insert(topic)
 	if err != nil {
@@ -69,14 +69,16 @@ func (t *Topic) SaveTopic(topic *Topic, tags []*Tag) int64 {
 		return -1
 	}
 
-	//manytomany
-	m2m := o.QueryM2M(topic, "Tags")
-	_, err = m2m.Add(tags)
-	if err != nil {
-		fmt.Printf("save topic error: %s", err.Error())
-		return -1
-	}
+	fmt.Println(tags)
 
+	for _, tagId := range tags {
+		_, err := o.Raw("insert into topic_tags (topic_id, tag_id) value (?, ?)", topic.Id, tagId).Exec()
+		if err != nil {
+			fmt.Printf("\n save topic_tags for save topic error[%s] \n", err.Error())
+			return -1
+		}
+
+	}
 	return id
 }
 
