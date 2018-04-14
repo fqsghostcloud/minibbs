@@ -29,8 +29,8 @@ type TopicAPI interface {
 }
 
 type Topic struct {
-	Id            int       `orm:"pk;auto"`
-	Title         string    `orm:"unique"`
+	Id            int `orm:"pk;auto"`
+	Title         string
 	Content       string    `orm:"type(text);null"`
 	InTime        time.Time `orm:"auto_now_add;type(datetime)"`
 	User          *User     `orm:"rel(fk)"`

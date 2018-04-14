@@ -10,9 +10,6 @@
           <div class="media-body">
             <h3 style="margin-top: 0">{{.CurrentUserInfo.Username}}</h3>
             {{if .CurrentUserInfo.Signature}}<p><i class="gray">{{.CurrentUserInfo.Signature}}</i></p>{{end}}
-            {{if .CurrentUserInfo.Url}}
-            <div>主页: <a href="{{.CurrentUserInfo.Url}}" target="_blank">{{.CurrentUserInfo.Url}}</a></div>
-            {{end}}
             <div>入驻时间: {{.CurrentUserInfo.InTime | timeago}}</div>
           </div>
         </div>

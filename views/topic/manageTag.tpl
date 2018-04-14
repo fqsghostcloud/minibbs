@@ -10,7 +10,7 @@
             <label for="tagName">标签名称</label>
             <input type="text" class="form-control" name="tagName" id="tagName" value="">
           </div>
-          <button type="submit" class="btn btn-default">提交</button>
+          <button type="submit" class="btn btn-default">添加</button>
         </form>
       </div>
     </div>
