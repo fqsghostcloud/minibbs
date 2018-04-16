@@ -16,6 +16,7 @@ type IndexController struct {
 
 // Index .
 func (c *IndexController) Index() {
+	topicName := c.Input().Get("topicName")
 	c.Data["PageTitle"] = "首页"
 	isLogin, user := filters.IsLogin(c.Controller.Ctx)
 	c.Data["IsLogin"] = isLogin
@@ -29,7 +30,7 @@ func (c *IndexController) Index() {
 	tagId, _ := strconv.Atoi(c.Ctx.Input.Query("tagId"))
 	c.Data["TagId"] = tagId
 	tag := models.Tag{Id: tagId}
-	c.Data["Page"] = models.TopicManager.PageTopic(page, size, &tag)
+	c.Data["Page"] = models.TopicManager.PageTopic(page, size, &tag, topicName)
 	c.Data["Tags"] = models.TagManager.FindAllTag(nil)
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "index.tpl"

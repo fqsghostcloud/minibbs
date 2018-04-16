@@ -1,6 +1,14 @@
 <div class="row">
   <div class="col-md-9">
     <div class="panel panel-default">
+     <div class="panel-heading">
+        <form class="form-inline" role="form" action="/" method="get">
+          <div class="form-group">
+            <input type="text" class="form-control" name="topicName" placeholder="请输入帖子名称">
+          </div>
+          <button type="submit" class="btn btn-default">搜索</button>
+        </form>
+      </div>
       <div class="panel-heading">
         <ul class="nav nav-pills">
           <li id="tab_0" style="font-size:20px"><a href="/?tab=all">全部</a></li>
@@ -20,7 +28,7 @@
               <a href="/topic/{{.Id}}">{{.Title}}</a>
             </div>
             <p class="gray">
-             {{range  .Title | getTopicTags}}
+             {{range  .Id | getTopicTags}}
             <span class="label label-primary">{{.Name}}</span>
             {{end}}
               <span>•</span>

@@ -23,8 +23,8 @@ func HasPermission(userID int, name string) bool {
 	return models.UserManager.FindPermissionByUserIDAndPermissionName(userID, name)
 }
 
-func GetTopicTags(topicName string) []models.Tag {
-	topic := models.TopicManager.FindTopicByName(topicName)
+func GetTopicTags(topicId int) []models.Tag {
+	topic := models.TopicManager.FindTopicById(topicId)
 	return models.TagManager.FindTagsByTopic(&topic)
 }
 

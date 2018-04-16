@@ -15,8 +15,7 @@ type TopicAPI interface {
 	SaveTopicTag(topicId int, tagId int)
 	FindTopicByTag(tag *Tag) []Topic
 	FindTopicById(id int) Topic
-	FindTopicByName(name string) Topic
-	PageTopic(p int, size int, tag *Tag) utils.Page                              // get  topic with tag
+	PageTopic(p int, size int, tag *Tag, topicName string) utils.Page            // get  topic with tag
 	PageTopicList(page int, size int, owner *User, searchName string) utils.Page // just get topic list without tag
 	IncrView(topic *Topic)
 	IncrReplyCount(topic *Topic)
@@ -90,13 +89,6 @@ func (t *Topic) FindTopicById(id int) Topic {
 	return topic
 }
 
-func (t *Topic) FindTopicByName(name string) Topic {
-	o := orm.NewOrm()
-	var topic Topic
-	o.QueryTable(topic).RelatedSel().Filter("Title", name).One(&topic)
-	return topic
-}
-
 func (t *Topic) PageTopicList(page int, size int, owner *User, searchName string) utils.Page {
 	o := orm.NewOrm()
 	var topic Topic
@@ -129,7 +121,7 @@ func (t *Topic) PageTopicList(page int, size int, owner *User, searchName string
 }
 
 // PageTopic .
-func (t *Topic) PageTopic(p int, size int, tag *Tag) utils.Page {
+func (t *Topic) PageTopic(p int, size int, tag *Tag, topicName string) utils.Page {
 	o := orm.NewOrm()
 	var topic Topic
 	var list []Topic
@@ -138,8 +130,15 @@ func (t *Topic) PageTopic(p int, size int, tag *Tag) utils.Page {
 	if tag.Id > 0 {
 		qs = qs.Filter("Tags__Tag__Id", tag.Id)
 	}
-	countStr, _ := qs.Filter("isApproval", true).Limit(-1).Count()
-	qs.Filter("isApproval", true).RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
+
+	var countStr int64
+	if topicName != "" {
+		countStr, _ = qs.Filter("Title__contains", topicName).Filter("isApproval", true).Limit(-1).Count()
+		qs.Filter("Title__contains", topicName).Filter("isApproval", true).RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
+	} else {
+		countStr, _ = qs.Filter("isApproval", true).Limit(-1).Count()
+		qs.Filter("isApproval", true).RelatedSel().OrderBy("-InTime").Limit(size).Offset((p - 1) * size).All(&list)
+	}
 
 	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
 	return utils.PageUtil(count, p, size, list)
