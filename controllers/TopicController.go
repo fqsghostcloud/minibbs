@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"minibbs/filters"
 	"minibbs/models"
+	"net/http"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -46,6 +47,32 @@ func (c *TopicController) Save() {
 
 		_, user := filters.IsLogin(c.Ctx)
 		topic := models.Topic{Title: title, Content: content, User: &user}
+
+		f, h, err := c.GetFile("file")
+		if err == http.ErrMissingFile {
+			id := models.TopicManager.SaveTopic(&topic, tags)
+			c.Redirect("/topic/"+strconv.FormatInt(id, 10), 302)
+		} else {
+			if err != nil {
+				flash.Error("上传失败")
+				flash.Store(&c.Controller)
+				c.Redirect("/topic/create", 302)
+				return
+			} else {
+				err := c.SaveToFile("file", "static/upload/files/"+h.Filename)
+				if err != nil {
+					fmt.Printf("\n upload file error[%s] \n", err.Error())
+					flash.Error("上传失败")
+					flash.Store(&c.Controller)
+					c.Redirect("/topic/create", 302)
+					return
+				}
+				topic.File = "static/upload/files/" + h.Filename
+			}
+
+		}
+		defer f.Close()
+
 		id := models.TopicManager.SaveTopic(&topic, tags)
 		c.Redirect("/topic/"+strconv.FormatInt(id, 10), 302)
 	}
@@ -115,6 +142,7 @@ func (c *TopicController) Update() {
 		topic := models.TopicManager.FindTopicById(id)
 		topic.Title = title
 		topic.Content = content
+		topic.IsApproval = false // 修改之后还需要再次审核
 		models.TopicManager.UpdateTopic(&topic)
 		c.Redirect("/topic/"+strconv.Itoa(id), 302)
 	}
@@ -373,4 +401,37 @@ func (c *TopicController) TopicNotApproval() {
 	c.Redirect("/topic/manage/", 302)
 	return
 
+}
+
+func (c *TopicController) Download() {
+	topicId, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	topic := models.TopicManager.FindTopicById(topicId)
+	c.Ctx.Output.Download(topic.File)
+}
+
+func (c *TopicController) UploadFile() {
+	flash := beego.NewFlash()
+	f, h, err := c.GetFile("file")
+	if err == http.ErrMissingFile {
+		flash.Error("请选择文件")
+		flash.Store(&c.Controller)
+		c.Redirect("/topic/create", 302)
+	}
+	defer f.Close()
+	if err != nil {
+		flash.Error("上传失败")
+		flash.Store(&c.Controller)
+		c.Redirect("/topic/create", 302)
+		return
+	} else {
+		c.SaveToFile("files", "static/upload/files/"+h.Filename)
+		idStr := c.GetString("topicId")
+		topicId, _ := strconv.Atoi(idStr)
+		topic := models.TopicManager.FindTopicById(topicId)
+		topic.File = "static/upload/files/" + h.Filename
+		models.TopicManager.UpdateTopic(&topic)
+		flash.Success("上传成功")
+		flash.Store(&c.Controller)
+		c.Redirect(fmt.Sprintf("/topic/%s", idStr), 302)
+	}
 }

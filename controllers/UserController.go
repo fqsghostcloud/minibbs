@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"minibbs/filters"
 	"minibbs/models"
 	"net/http"
@@ -90,7 +91,7 @@ func (c *UserController) UpdateAvatar() {
 	flash := beego.NewFlash()
 	f, h, err := c.GetFile("avatar")
 	if err == http.ErrMissingFile {
-		flash.Error("请选择文件")
+		flash.Error("请选择图片")
 		flash.Store(&c.Controller)
 		c.Redirect("/user/setting", 302)
 	}
@@ -101,7 +102,14 @@ func (c *UserController) UpdateAvatar() {
 		c.Redirect("/user/setting", 302)
 		return
 	} else {
-		c.SaveToFile("avatar", "static/upload/avatar/"+h.Filename)
+		err := c.SaveToFile("avatar", "static/upload/avatar/"+h.Filename)
+		if err != nil {
+			fmt.Printf("\n upload avatar error[%s] \n", err.Error())
+			flash.Error("上传失败")
+			flash.Store(&c.Controller)
+			c.Redirect("/user/setting", 302)
+			return
+		}
 		_, user := filters.IsLogin(c.Ctx)
 		user.Image = "/static/upload/avatar/" + h.Filename
 		models.UserManager.UpdateUser(&user)

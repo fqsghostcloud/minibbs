@@ -23,22 +23,37 @@ func HasPermission(userID int, name string) bool {
 	return models.UserManager.FindPermissionByUserIDAndPermissionName(userID, name)
 }
 
+func IsTopicUser(userId int, topicId int) bool {
+	user := models.User{Id: userId}
+
+	if !IsAdmin(user) {
+		topicUser := models.TopicManager.FindTopicById(topicId).User
+		if userId == topicUser.Id {
+			return true
+		}
+		return false
+	}
+
+	return true
+}
+
 func GetTopicTags(topicId int) []models.Tag {
 	topic := models.TopicManager.FindTopicById(topicId)
 	return models.TagManager.FindTagsByTopic(&topic)
 }
 
 func IsAdmin(user models.User) bool {
-	isAdmin := false
 	roles := models.RoleManager.FindRolesByUser(&user)
 	for _, v := range roles {
 		if v.Name == models.ADMIN {
-			isAdmin = true
-			break
+			return true
 		}
 	}
+	return false
+}
 
-	return isAdmin
+func HasFile(topicFile string) bool {
+	return len(topicFile) > 0
 }
 
 func init() {
@@ -47,4 +62,6 @@ func init() {
 	beego.AddFuncMap("haspermission", HasPermission)
 	beego.AddFuncMap("getTopicTags", GetTopicTags)
 	beego.AddFuncMap("isAdmin", IsAdmin)
+	beego.AddFuncMap("isTopicUser", IsTopicUser)
+	beego.AddFuncMap("hasFile", HasFile)
 }

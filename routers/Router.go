@@ -24,11 +24,14 @@ func init() {
 	beego.Router("/topic/join/ws/chat", &controllers.ChatRoomController{}, "GET:Chat") // bug
 
 	//创建，修改，删除帖子
-	beego.InsertFilter("/topic/create", beego.BeforeRouter, filters.HasPermission)
+	beego.InsertFilter("/topic/create/*", beego.BeforeRouter, filters.HasPermission)
 	beego.Router("/topic/create", &controllers.TopicController{}, "GET:Create")
 	beego.Router("/topic/create", &controllers.TopicController{}, "POST:Save")
 
 	beego.Router("/topic/:id([0-9]+)", &controllers.TopicController{}, "GET:Detail")
+	//下载附件
+	beego.InsertFilter("/topic/:id([0-9]+)/download", beego.BeforeRouter, filters.FilterUser)
+	beego.Router("/topic/:id([0-9]+)/download", &controllers.TopicController{}, "GET:Download")
 
 	beego.InsertFilter("/topic/edit/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.InsertFilter("/topic/edit/:id([0-9]+)", beego.BeforeRouter, filters.IsTopicUser)

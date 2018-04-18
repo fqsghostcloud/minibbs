@@ -6,7 +6,7 @@
       </div>
       <div class="panel-body">
         {{template "../components/flash_error.tpl" .}}
-        <form method="post" action="/topic/create">
+        <form method="post" action="/topic/create" enctype="multipart/form-data">
           <div class="form-group">
             <label for="title">标题</label>
             <input type="text" class="form-control" Id="title" name="title" placeholder="标题">
@@ -23,6 +23,10 @@
                 <label for="{{.Id}}">{{.Name}}</label>&nbsp;
               {{end}}
             </div>
+          </div>
+          <div class="form-group">
+            <label >选择文件</label>
+            <input type="file" class="form-control" name="file">
           </div>
           <button type="submit" class="btn btn-default">发布</button>
         </form>

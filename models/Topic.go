@@ -39,6 +39,7 @@ type Topic struct {
 	LastReplyTime time.Time `orm:"auto_now_add;type(datetime)"`
 	Tags          []*Tag    `orm:"rel(m2m)"`
 	IsApproval    bool      `orm:"default(false)"`
+	File          string
 }
 
 // TopicManager manager topic api
