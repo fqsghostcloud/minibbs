@@ -5,6 +5,7 @@ import (
 	"minibbs/filters"
 	"minibbs/models"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -59,7 +60,10 @@ func (c *TopicController) Save() {
 				c.Redirect("/topic/create", 302)
 				return
 			} else {
-				err := c.SaveToFile("file", "static/upload/files/"+h.Filename)
+				dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
+					user.Username, "files", h.Filename)
+
+				err := c.SaveToFile("file", dirFile)
 				if err != nil {
 					fmt.Printf("\n upload file error[%s] \n", err.Error())
 					flash.Error("上传失败")
@@ -67,7 +71,7 @@ func (c *TopicController) Save() {
 					c.Redirect("/topic/create", 302)
 					return
 				}
-				topic.File = "static/upload/files/" + h.Filename
+				topic.File = dirFile
 			}
 
 		}
@@ -124,6 +128,7 @@ func (c *TopicController) Update() {
 	title := c.Input().Get("title")
 	content := c.Input().Get("content")
 	tids := c.GetStrings("tids")
+
 	if len(title) == 0 || len(title) > 120 {
 		flash.Error("话题标题不能为空且不能超过120个字符")
 		flash.Store(&c.Controller)
@@ -143,6 +148,46 @@ func (c *TopicController) Update() {
 		topic.Title = title
 		topic.Content = content
 		topic.IsApproval = false // 修改之后还需要再次审核
+
+		user := topic.User
+
+		f, h, err := c.GetFile("file")
+		if err == http.ErrMissingFile {
+			models.TopicManager.UpdateTopic(&topic)
+			c.Redirect("/topic/"+strconv.Itoa(id), 302)
+		} else {
+			if err != nil {
+				fmt.Printf("\n upload file error[%s] \n", err.Error())
+				flash.Error("上传失败")
+				flash.Store(&c.Controller)
+				c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
+				return
+			} else {
+				dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
+					user.Username, "files", h.Filename)
+
+				err := c.SaveToFile("file", dirFile)
+				if err != nil {
+					fmt.Printf("\n upload file error[%s] \n", err.Error())
+					flash.Error("上传失败")
+					flash.Store(&c.Controller)
+					c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
+					return
+				}
+
+				if len(topic.File) > 0 {
+					err := os.Remove(topic.File)
+					if err != nil {
+						fmt.Printf("\n update topic and remove file error[%s] \n", err.Error())
+					}
+				}
+
+				topic.File = dirFile
+			}
+
+		}
+		defer f.Close()
+
 		models.TopicManager.UpdateTopic(&topic)
 		c.Redirect("/topic/"+strconv.Itoa(id), 302)
 	}
@@ -156,6 +201,11 @@ func (c *TopicController) Delete() {
 		models.TopicManager.DeleteTopicTagsByTopicId(id)
 		_, user := filters.IsLogin(c.Ctx)
 		roles := models.RoleManager.FindRolesByUser(&user)
+
+		err := os.Remove(topic.File)
+		if err != nil {
+			fmt.Printf("\n delete topic and delete file error[%s] \n", err.Error())
+		}
 
 		for _, v := range roles {
 			if v.Name == "管理员" {
@@ -424,11 +474,18 @@ func (c *TopicController) UploadFile() {
 		c.Redirect("/topic/create", 302)
 		return
 	} else {
-		c.SaveToFile("files", "static/upload/files/"+h.Filename)
+		_, user := filters.IsLogin(c.Ctx)
+
+		dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
+			user.Username, "files", h.Filename)
+
+		c.SaveToFile("files", dirFile)
+
 		idStr := c.GetString("topicId")
 		topicId, _ := strconv.Atoi(idStr)
 		topic := models.TopicManager.FindTopicById(topicId)
-		topic.File = "static/upload/files/" + h.Filename
+		topic.File = dirFile
+
 		models.TopicManager.UpdateTopic(&topic)
 		flash.Success("上传成功")
 		flash.Store(&c.Controller)

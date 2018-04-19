@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"fmt"
 	"minibbs/filters"
 	"minibbs/models"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -152,9 +154,27 @@ func (c *IndexController) Register() {
 		return
 	}
 
+	dir := beego.AppConfig.String("dirpath")
+	if len(dir) == 0 {
+		dir = "static/upload/users"
+	}
+
+	dirAvatar := fmt.Sprintf("%s/%s/%s", dir, username, "avatar")
+	dirFiles := fmt.Sprintf("%s/%s/%s", dir, username, "files")
+
+	err := os.MkdirAll(dirAvatar, 0777)
+	if err != nil {
+		fmt.Printf("\n register user[%s] create avatar dir error[%s] \n", username, err.Error())
+	}
+
+	err = os.MkdirAll(dirFiles, 0777)
+	if err != nil {
+		fmt.Printf("\n register user[%s] create files dir error[%s] \n", username, err.Error())
+	}
+
 	// 普通用户赋值
 	role := models.RoleManager.FindRoleByName("普通用户")
-	models.UserManager.SaveUserRole(user.Id, role.Id)
+	models.UserManager.SaveUserRole(user.Id, role.Id) //默认角色
 
 	flash.Success("注册成功")
 	flash.Store(&c.Controller)

@@ -5,6 +5,7 @@ import (
 	"minibbs/filters"
 	"minibbs/models"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 
@@ -102,7 +103,13 @@ func (c *UserController) UpdateAvatar() {
 		c.Redirect("/user/setting", 302)
 		return
 	} else {
-		err := c.SaveToFile("avatar", "static/upload/avatar/"+h.Filename)
+
+		_, user := filters.IsLogin(c.Ctx)
+
+		dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
+			user.Username, "avatar", h.Filename)
+
+		err := c.SaveToFile("avatar", dirFile)
 		if err != nil {
 			fmt.Printf("\n upload avatar error[%s] \n", err.Error())
 			flash.Error("上传失败")
@@ -110,8 +117,13 @@ func (c *UserController) UpdateAvatar() {
 			c.Redirect("/user/setting", 302)
 			return
 		}
-		_, user := filters.IsLogin(c.Ctx)
-		user.Image = "/static/upload/avatar/" + h.Filename
+
+		err = os.Remove(user.Image) //删除旧头像
+		if err != nil {
+			fmt.Printf("\n update avatar and delete old avatar error[%s] \n", err.Error())
+		}
+
+		user.Image = dirFile
 		models.UserManager.UpdateUser(&user)
 		flash.Success("上传成功")
 		flash.Store(&c.Controller)
@@ -178,6 +190,12 @@ func (c *UserController) Delete() {
 		if ok {
 			models.UserManager.DeleteUser(&user)
 			models.UserManager.DeleteUserRolesByUserId(user.Id)
+
+			deletePath := fmt.Sprintf("%s/%s", beego.AppConfig.String("dirpath"), user.Username)
+			err := os.RemoveAll(deletePath)
+			if err != nil {
+				fmt.Printf("\n delete user and delete user dir error[%s] \n", err.Error())
+			}
 		}
 		c.Redirect("/user/list", 302)
 	} else {
