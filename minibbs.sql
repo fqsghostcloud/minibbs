@@ -2,8 +2,6 @@
 
 -- CREATE DATABASE minibbs DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 
-LOCK TABLES `permission` WRITE;
-
 INSERT INTO `permission` (`id`, `pid`, `name`, `description`, `url`)
 VALUES
 	(1,0,'','话题节点',''),
@@ -31,33 +29,30 @@ VALUES
 	(27,1,'topic:chat','聊天室','/topic/join/ws'),
 	(28,1,'tag:manage','标签管理','/tag/manage');
 
-UNLOCK TABLES;
 
 
 
 
-LOCK TABLES `reply` WRITE;
+
+
 
 INSERT INTO `reply` (`id`, `topic_id`, `content`, `user_id`, `up`, `in_time`)
 VALUES
 	(1,1,'分享世界',1,0,'2016-08-26 09:22:52');
 
-UNLOCK TABLES;
 
 
-LOCK TABLES `role` WRITE;
+
+
 
 INSERT INTO `role` (`id`, `name`)
 VALUES
     (3,'管理员'), 
 	(5,'普通用户');
 
-UNLOCK TABLES;
 
 
 
-
-LOCK TABLES `role_permissions` WRITE;
 
 INSERT INTO `role_permissions` (`id`, `role_id`, `permission_id`)
 VALUES
@@ -85,10 +80,8 @@ VALUES
 	(79,3,23),
 	(80,3,24);
 
-UNLOCK TABLES;
 
 
-LOCK TABLES `tag` WRITE;
 
 INSERT INTO `tag` (`id`, `name`)
 VALUES
@@ -96,25 +89,25 @@ VALUES
 	(3,'golang'),
 	(2,'kubernetes');
 
-UNLOCK TABLES;
 
 
-LOCK TABLES `user` WRITE;
 
-INSERT INTO `user` (`id`, `username`, `password`, `token`, `image`, `email`, `url`, `signature`, `in_time`, `last_time`, `active`)
+
+
+INSERT INTO `user` (`id`, `username`, `password`, `token`, `image`, `email`, `signature`, `in_time`, `last_time`, `active`)
 VALUES
-	(1,'root','123456','fcd1cb8e-b71f-46c3-9974-7225997b40c7','/static/imgs/default.png','11278996513@qq.com','https://minibbs.com','个人介绍','2016-08-26 09:22:16','1970-01-01 00:00:00', '1');
-
-UNLOCK TABLES;
+	(1,'root','$2a$10$9LjYG/iOJaifWlJeAUwXOuFjDjhHrTRHdpdXk6zKYbNDMJ25Hexwq','fcd1cb8e-b71f-46c3-9974-7225997b40c7','/static/imgs/default.png','11278996513@qq.com','个人介绍','2016-08-26 09:22:16','1970-01-01 00:00:00', '1');
 
 
 
 
-LOCK TABLES `user_roles` WRITE;
+
+
+
 
 INSERT INTO `user_roles` (`id`, `user_id`, `role_id`)
 VALUES
 	(5,1,3);
 
-UNLOCK TABLES;
+
 
