@@ -96,6 +96,8 @@ func (c *TopicController) Detail() {
 		c.Data["Replies"] = models.ReplyManager.FindReplyByTopic(&topic)
 		c.Layout = "layout/layout.tpl"
 		c.TplName = "topic/detail.tpl"
+		c.LayoutSections = make(map[string]string)
+		c.LayoutSections["TopicScript"] = "topic/topicScript.tpl"
 	} else {
 		c.Ctx.WriteString("话题不存在")
 	}

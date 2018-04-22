@@ -71,5 +71,6 @@
   <br>
 </div>
 {{.ChatRoomScript}}
+{{.TopicScript}}
 </body>
 </html>

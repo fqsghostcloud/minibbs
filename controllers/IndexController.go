@@ -116,7 +116,7 @@ func (c *IndexController) Register() {
 	flash := beego.NewFlash()
 	username, password, email := c.Input().Get("username"), c.Input().Get("password"), c.Input().Get("email")
 	if len(username) == 0 || len(password) == 0 || len(email) == 0 {
-		flash.Error("输入框不能为空")
+		flash.Error("输入信息不能为空")
 		flash.Store(&c.Controller)
 		c.Redirect("/register", http.StatusFound)
 		return
