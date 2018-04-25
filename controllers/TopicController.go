@@ -29,7 +29,7 @@ func (c *TopicController) Create() {
 
 func (c *TopicController) Save() {
 	flash := beego.NewFlash()
-	title, content := c.Input().Get("title"), c.Input().Get("content")
+	title, content := c.Input().Get("title"), c.Input().Get("my-editormd-html-code")
 	tids := c.GetStrings("tids")
 	if len(title) == 0 || len(title) > 120 {
 		flash.Error("话题标题不能为空且不能超过120个字符")
@@ -128,7 +128,7 @@ func (c *TopicController) Update() {
 	flash := beego.NewFlash()
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	title := c.Input().Get("title")
-	content := c.Input().Get("content")
+	content := c.Input().Get("my-editormd-html-code")
 	tids := c.GetStrings("tids")
 
 	if len(title) == 0 || len(title) > 120 {
