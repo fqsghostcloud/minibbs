@@ -35,10 +35,12 @@ func (c *TopicController) Save() {
 		flash.Error("话题标题不能为空且不能超过120个字符")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/create", 302)
+		return
 	} else if len(tids) == 0 {
 		flash.Error("请选择话题标签")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/create", 302)
+		return
 	} else {
 		var tags []models.Tag
 		for _, strid := range tids {
@@ -53,6 +55,7 @@ func (c *TopicController) Save() {
 		if err == http.ErrMissingFile {
 			id := models.TopicManager.SaveTopic(&topic, tags)
 			c.Redirect("/topic/"+strconv.FormatInt(id, 10), 302)
+			return
 		} else {
 			if err != nil {
 				flash.Error("上传失败")
@@ -74,11 +77,13 @@ func (c *TopicController) Save() {
 				topic.File = dirFile
 			}
 
+			f.Close()
+
 		}
-		defer f.Close()
 
 		id := models.TopicManager.SaveTopic(&topic, tags)
 		c.Redirect("/topic/"+strconv.FormatInt(id, 10), 302)
+		return
 	}
 }
 
@@ -135,10 +140,12 @@ func (c *TopicController) Update() {
 		flash.Error("话题标题不能为空且不能超过120个字符")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
+		return
 	} else if len(tids) == 0 {
 		flash.Error("请选择话题标签")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
+		return
 	} else {
 		models.TopicManager.DeleteTopicTagsByTopicId(id)
 		for _, v := range tids {
@@ -157,6 +164,7 @@ func (c *TopicController) Update() {
 		if err == http.ErrMissingFile {
 			models.TopicManager.UpdateTopic(&topic)
 			c.Redirect("/topic/"+strconv.Itoa(id), 302)
+			return
 		} else {
 			if err != nil {
 				fmt.Printf("\n upload file error[%s] \n", err.Error())
@@ -185,13 +193,14 @@ func (c *TopicController) Update() {
 				}
 
 				topic.File = dirFile
+				f.Close()
 			}
 
 		}
-		defer f.Close()
 
 		models.TopicManager.UpdateTopic(&topic)
 		c.Redirect("/topic/"+strconv.Itoa(id), 302)
+		return
 	}
 }
 
@@ -468,6 +477,7 @@ func (c *TopicController) UploadFile() {
 		flash.Error("请选择文件")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/create", 302)
+		return
 	}
 	defer f.Close()
 	if err != nil {
@@ -492,5 +502,6 @@ func (c *TopicController) UploadFile() {
 		flash.Success("上传成功")
 		flash.Store(&c.Controller)
 		c.Redirect(fmt.Sprintf("/topic/%s", idStr), 302)
+		return
 	}
 }
