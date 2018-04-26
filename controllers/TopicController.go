@@ -29,6 +29,45 @@ func (c *TopicController) Create() {
 	c.TplName = "topic/create.tpl"
 }
 
+type RePicInfo struct {
+	Success int    `json:"success"` //0表示上传失败;1表示上传成功
+	Message string `json:"message"` //提示的信息
+	URL     string `json:"url"`     //图片地址 上传成功时才返回
+}
+
+func (c *TopicController) InsertPic() {
+	returnInfo := new(RePicInfo)
+
+	f, h, err := c.GetFile("editormd-image-file")
+	defer f.Close()
+
+	// 保证文件名唯一
+	uid := strconv.FormatInt(time.Now().UnixNano(), 10)
+	h.Filename = uid + "_" + h.Filename
+
+	_, user := filters.IsLogin(c.Ctx)
+
+	dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
+		user.Username, "files", h.Filename)
+
+	err = c.SaveToFile("editormd-image-file", dirFile)
+	if err != nil {
+		fmt.Printf("\ninsert picture to topic error[%s]\n", err.Error())
+		returnInfo.Success = 0
+		returnInfo.Message = "上传图片失败"
+		c.Data["json"] = returnInfo
+		c.ServeJSON()
+		return
+	}
+
+	returnInfo.Success = 1
+	returnInfo.Message = "上传图片成功"
+	returnInfo.URL = "/" + dirFile
+	c.Data["json"] = returnInfo
+	c.ServeJSON()
+	return
+}
+
 func (c *TopicController) Save() {
 	flash := beego.NewFlash()
 	title, content := c.Input().Get("title"), c.Input().Get("my-editormd-html-code")

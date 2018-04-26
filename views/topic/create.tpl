@@ -46,7 +46,12 @@
           height  : 450,
           syncScrolling : "single",
           path    : "/static/editor/lib/",//注意2：你的路径
-          saveHTMLToTextarea : true//注意3：这个配置，方便post提交表单
+          saveHTMLToTextarea : true,//注意3：这个配置，方便post提交表单
+
+          /**上传图片相关配置如下*/
+          imageUpload : true,
+          imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+          imageUploadURL : "/topic/edit/insertpic",//注意你后端的上传图片服务地址
       });
   });
 </script>

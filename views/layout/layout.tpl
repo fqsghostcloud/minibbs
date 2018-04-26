@@ -9,9 +9,10 @@
   <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css"/>
   <link rel="stylesheet" href="/static/css/minibbs.css">
   <link rel="stylesheet"href="/static/editor/css/editormd.css" />
+  <script src="/static/js/jquery.min.js"></script>
   <script src="/static/js/jquery-1.10.1.min.js"></script>
   <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-  <script src="/static/editor/editormd.min.js"></script>
+  <script src="/static/editor/editormd.js"></script>
 
 </head>
 <body>
