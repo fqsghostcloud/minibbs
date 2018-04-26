@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/astaxie/beego"
 )
@@ -63,6 +65,11 @@ func (c *TopicController) Save() {
 				c.Redirect("/topic/create", 302)
 				return
 			} else {
+
+				// 保证文件名唯一
+				uid := strconv.FormatInt(time.Now().UnixNano(), 10)
+				h.Filename = uid + "_" + h.Filename
+
 				dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
 					user.Username, "files", h.Filename)
 
@@ -74,7 +81,7 @@ func (c *TopicController) Save() {
 					c.Redirect("/topic/create", 302)
 					return
 				}
-				topic.File = dirFile
+				topic.File = "/" + dirFile
 			}
 
 			f.Close()
@@ -173,6 +180,10 @@ func (c *TopicController) Update() {
 				c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
 				return
 			} else {
+				// 保证文件名唯一
+				uid := strconv.FormatInt(time.Now().UnixNano(), 10)
+				h.Filename = uid + "_" + h.Filename
+
 				dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
 					user.Username, "files", h.Filename)
 
@@ -186,13 +197,14 @@ func (c *TopicController) Update() {
 				}
 
 				if len(topic.File) > 0 {
+					topic.File = strings.TrimPrefix(topic.File, "/")
 					err := os.Remove(topic.File)
 					if err != nil {
 						fmt.Printf("\n update topic and remove file error[%s] \n", err.Error())
 					}
 				}
 
-				topic.File = dirFile
+				topic.File = "/" + dirFile
 				f.Close()
 			}
 
@@ -213,6 +225,7 @@ func (c *TopicController) Delete() {
 		_, user := filters.IsLogin(c.Ctx)
 		roles := models.RoleManager.FindRolesByUser(&user)
 
+		topic.File = strings.TrimPrefix(topic.File, "/")
 		err := os.Remove(topic.File)
 		if err != nil {
 			fmt.Printf("\n delete topic and delete file error[%s] \n", err.Error())
@@ -467,41 +480,45 @@ func (c *TopicController) TopicNotApproval() {
 func (c *TopicController) Download() {
 	topicId, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	topic := models.TopicManager.FindTopicById(topicId)
-	c.Ctx.Output.Download(topic.File)
+	c.Ctx.Output.Download(strings.TrimPrefix(topic.File, "/"))
 }
 
-func (c *TopicController) UploadFile() {
-	flash := beego.NewFlash()
-	f, h, err := c.GetFile("file")
-	if err == http.ErrMissingFile {
-		flash.Error("请选择文件")
-		flash.Store(&c.Controller)
-		c.Redirect("/topic/create", 302)
-		return
-	}
-	defer f.Close()
-	if err != nil {
-		flash.Error("上传失败")
-		flash.Store(&c.Controller)
-		c.Redirect("/topic/create", 302)
-		return
-	} else {
-		_, user := filters.IsLogin(c.Ctx)
+// func (c *TopicController) UploadFile() {
+// 	flash := beego.NewFlash()
+// 	f, h, err := c.GetFile("file")
+// 	if err == http.ErrMissingFile {
+// 		flash.Error("请选择文件")
+// 		flash.Store(&c.Controller)
+// 		c.Redirect("/topic/create", 302)
+// 		return
+// 	}
+// 	defer f.Close()
+// 	if err != nil {
+// 		flash.Error("上传失败")
+// 		flash.Store(&c.Controller)
+// 		c.Redirect("/topic/create", 302)
+// 		return
+// 	} else {
+// 		_, user := filters.IsLogin(c.Ctx)
 
-		dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
-			user.Username, "files", h.Filename)
+// 		uid := string([]rune(user.Token)[:5])
+// 		h.Filename = uid + "_" + h.Filename
 
-		c.SaveToFile("files", dirFile)
+// 		dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
+// 			user.Username, "files", h.Filename)
 
-		idStr := c.GetString("topicId")
-		topicId, _ := strconv.Atoi(idStr)
-		topic := models.TopicManager.FindTopicById(topicId)
-		topic.File = dirFile
+// 		c.SaveToFile("files", dirFile)
 
-		models.TopicManager.UpdateTopic(&topic)
-		flash.Success("上传成功")
-		flash.Store(&c.Controller)
-		c.Redirect(fmt.Sprintf("/topic/%s", idStr), 302)
-		return
-	}
-}
+// 		idStr := c.GetString("topicId")
+// 		topicId, _ := strconv.Atoi(idStr)
+// 		topic := models.TopicManager.FindTopicById(topicId)
+
+// 		topic.File = "/" + dirFile
+
+// 		models.TopicManager.UpdateTopic(&topic)
+// 		flash.Success("上传成功")
+// 		flash.Store(&c.Controller)
+// 		c.Redirect(fmt.Sprintf("/topic/%s", idStr), 302)
+// 		return
+// 	}
+// }
