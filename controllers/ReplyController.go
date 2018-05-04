@@ -21,6 +21,7 @@ func (c *ReplyController) Save() {
 		tid, _ := strconv.Atoi(c.Input().Get("tid"))
 		if tid == 0 {
 			c.Ctx.WriteString("回复的话题不存在")
+			return
 		} else {
 			_, user := filters.IsLogin(c.Ctx)
 			topic := models.TopicManager.FindTopicById(tid)
@@ -28,6 +29,7 @@ func (c *ReplyController) Save() {
 			models.ReplyManager.SaveReply(&reply)
 			models.TopicManager.IncrReplyCount(&topic)
 			c.Redirect("/topic/"+strconv.Itoa(tid), 302)
+			return
 		}
 	}
 }
@@ -67,8 +69,10 @@ func (c *ReplyController) Delete() {
 		models.TopicManager.ReduceReplyCount(reply.Topic)
 		models.ReplyManager.DeleteReply(&reply)
 		c.Redirect("/topic/"+strconv.Itoa(tid), 302)
+		return
 	} else {
 		c.Ctx.WriteString("回复不存在")
+		return
 	}
 }
 

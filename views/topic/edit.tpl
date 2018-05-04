@@ -13,7 +13,11 @@
           </div>
           <div class="form-group">
             <label for="title">内容</label>
-            <textarea name="content" Id="content" rows="15" class="form-control" placeholder="支持Markdown语法哦~">{{.Topic.Content}}</textarea>
+            <div id="my-editormd" >
+              <textarea id="my-editormd-markdown-doc" name="my-editormd-markdown-doc" style="display:none;">{{.Topic.Content}}</textarea>
+              <!-- 注意：name属性的值-->
+              <textarea id="my-editormd-html-code" name="my-editormd-html-code" style="display:none;"></textarea>
+            </div>
           </div>
           <div class="form-group">
             <label for="title">标签</label>
@@ -39,5 +43,17 @@
     {{range .TopicTags}}
     $("#tag_{{.Id}}").attr("checked", true);
     {{end}}
+  });
+</script>
+
+<script type="text/javascript">
+  $(function() {
+      editormd("my-editormd", {//注意1：这里的就是上面的DIV的id属性值
+          width   : "90%",
+          height  : 450,
+          syncScrolling : "single",
+          path    : "/static/editor/lib/",//注意2：你的路径
+          saveHTMLToTextarea : true//注意3：这个配置，方便post提交表单
+      });
   });
 </script>

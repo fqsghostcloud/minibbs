@@ -45,18 +45,22 @@ func (c *PermissionController) Save() {
 		flash.Error("权限标识不能为空")
 		flash.Store(&c.Controller)
 		c.Redirect("/permission/add?pid="+strconv.Itoa(pid), 302)
+		return
 	} else if pid > 0 && len(url) == 0 {
 		flash.Error("授权地址不能为空")
 		flash.Store(&c.Controller)
 		c.Redirect("/permission/add?pid="+strconv.Itoa(pid), 302)
+		return
 	} else if len(description) == 0 {
 		flash.Error("权限描述不能为空")
 		flash.Store(&c.Controller)
 		c.Redirect("/permission/add?pid="+strconv.Itoa(pid), 302)
+		return
 	} else {
 		permission := models.Permission{Pid: pid, Name: name, Url: url, Description: description}
 		models.PermissionManager.SavePermission(&permission)
 		c.Redirect("/permission/list?pid="+strconv.Itoa(pid), 302)
+		return
 	}
 }
 
@@ -80,18 +84,22 @@ func (c *PermissionController) Update() {
 		flash.Error("权限标识不能为空")
 		flash.Store(&c.Controller)
 		c.Redirect("/permission/edit/"+strconv.Itoa(id), 302)
+		return
 	} else if pid > 0 && len(url) == 0 {
 		flash.Error("授权地址不能为空")
 		flash.Store(&c.Controller)
 		c.Redirect("/permission/edit/"+strconv.Itoa(id), 302)
+		return
 	} else if len(description) == 0 {
 		flash.Error("权限描述不能为空")
 		flash.Store(&c.Controller)
 		c.Redirect("/permission/edit/"+strconv.Itoa(id), 302)
+		return
 	} else {
 		permission := models.Permission{Id: id, Pid: pid, Name: name, Url: url, Description: description}
 		models.PermissionManager.UpdatePermission(&permission)
 		c.Redirect("/permission/list?pid="+strconv.Itoa(pid), 302)
+		return
 	}
 }
 
@@ -102,6 +110,7 @@ func (c *PermissionController) Delete() {
 		models.PermissionManager.DeleteRolePermissionByPermissionId(id)
 		models.PermissionManager.DeletePermission(&permission)
 		c.Redirect("/permission/list", 302)
+		return
 	} else {
 		c.Ctx.WriteString("权限不存在")
 	}

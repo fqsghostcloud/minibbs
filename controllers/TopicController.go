@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/astaxie/beego"
 )
@@ -27,18 +29,59 @@ func (c *TopicController) Create() {
 	c.TplName = "topic/create.tpl"
 }
 
+type RePicInfo struct {
+	Success int    `json:"success"` //0表示上传失败;1表示上传成功
+	Message string `json:"message"` //提示的信息
+	URL     string `json:"url"`     //图片地址 上传成功时才返回
+}
+
+func (c *TopicController) InsertPic() {
+	returnInfo := new(RePicInfo)
+
+	f, h, err := c.GetFile("editormd-image-file")
+	defer f.Close()
+
+	// 保证文件名唯一
+	uid := strconv.FormatInt(time.Now().UnixNano(), 10)
+	h.Filename = uid + "_" + h.Filename
+
+	_, user := filters.IsLogin(c.Ctx)
+
+	dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
+		user.Username, "files", h.Filename)
+
+	err = c.SaveToFile("editormd-image-file", dirFile)
+	if err != nil {
+		fmt.Printf("\ninsert picture to topic error[%s]\n", err.Error())
+		returnInfo.Success = 0
+		returnInfo.Message = "上传图片失败"
+		c.Data["json"] = returnInfo
+		c.ServeJSON()
+		return
+	}
+
+	returnInfo.Success = 1
+	returnInfo.Message = "上传图片成功"
+	returnInfo.URL = "/" + dirFile
+	c.Data["json"] = returnInfo
+	c.ServeJSON()
+	return
+}
+
 func (c *TopicController) Save() {
 	flash := beego.NewFlash()
-	title, content := c.Input().Get("title"), c.Input().Get("content")
+	title, content := c.Input().Get("title"), c.Input().Get("my-editormd-html-code")
 	tids := c.GetStrings("tids")
 	if len(title) == 0 || len(title) > 120 {
 		flash.Error("话题标题不能为空且不能超过120个字符")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/create", 302)
+		return
 	} else if len(tids) == 0 {
 		flash.Error("请选择话题标签")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/create", 302)
+		return
 	} else {
 		var tags []models.Tag
 		for _, strid := range tids {
@@ -53,6 +96,7 @@ func (c *TopicController) Save() {
 		if err == http.ErrMissingFile {
 			id := models.TopicManager.SaveTopic(&topic, tags)
 			c.Redirect("/topic/"+strconv.FormatInt(id, 10), 302)
+			return
 		} else {
 			if err != nil {
 				flash.Error("上传失败")
@@ -60,6 +104,11 @@ func (c *TopicController) Save() {
 				c.Redirect("/topic/create", 302)
 				return
 			} else {
+
+				// 保证文件名唯一
+				uid := strconv.FormatInt(time.Now().UnixNano(), 10)
+				h.Filename = uid + "_" + h.Filename
+
 				dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
 					user.Username, "files", h.Filename)
 
@@ -71,14 +120,16 @@ func (c *TopicController) Save() {
 					c.Redirect("/topic/create", 302)
 					return
 				}
-				topic.File = dirFile
+				topic.File = "/" + dirFile
 			}
 
+			f.Close()
+
 		}
-		defer f.Close()
 
 		id := models.TopicManager.SaveTopic(&topic, tags)
 		c.Redirect("/topic/"+strconv.FormatInt(id, 10), 302)
+		return
 	}
 }
 
@@ -128,17 +179,19 @@ func (c *TopicController) Update() {
 	flash := beego.NewFlash()
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	title := c.Input().Get("title")
-	content := c.Input().Get("content")
+	content := c.Input().Get("my-editormd-html-code")
 	tids := c.GetStrings("tids")
 
 	if len(title) == 0 || len(title) > 120 {
 		flash.Error("话题标题不能为空且不能超过120个字符")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
+		return
 	} else if len(tids) == 0 {
 		flash.Error("请选择话题标签")
 		flash.Store(&c.Controller)
 		c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
+		return
 	} else {
 		models.TopicManager.DeleteTopicTagsByTopicId(id)
 		for _, v := range tids {
@@ -157,6 +210,7 @@ func (c *TopicController) Update() {
 		if err == http.ErrMissingFile {
 			models.TopicManager.UpdateTopic(&topic)
 			c.Redirect("/topic/"+strconv.Itoa(id), 302)
+			return
 		} else {
 			if err != nil {
 				fmt.Printf("\n upload file error[%s] \n", err.Error())
@@ -165,6 +219,10 @@ func (c *TopicController) Update() {
 				c.Redirect("/topic/edit/"+strconv.Itoa(id), 302)
 				return
 			} else {
+				// 保证文件名唯一
+				uid := strconv.FormatInt(time.Now().UnixNano(), 10)
+				h.Filename = uid + "_" + h.Filename
+
 				dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
 					user.Username, "files", h.Filename)
 
@@ -178,20 +236,22 @@ func (c *TopicController) Update() {
 				}
 
 				if len(topic.File) > 0 {
+					topic.File = strings.TrimPrefix(topic.File, "/")
 					err := os.Remove(topic.File)
 					if err != nil {
 						fmt.Printf("\n update topic and remove file error[%s] \n", err.Error())
 					}
 				}
 
-				topic.File = dirFile
+				topic.File = "/" + dirFile
+				f.Close()
 			}
 
 		}
-		defer f.Close()
 
 		models.TopicManager.UpdateTopic(&topic)
 		c.Redirect("/topic/"+strconv.Itoa(id), 302)
+		return
 	}
 }
 
@@ -204,6 +264,7 @@ func (c *TopicController) Delete() {
 		_, user := filters.IsLogin(c.Ctx)
 		roles := models.RoleManager.FindRolesByUser(&user)
 
+		topic.File = strings.TrimPrefix(topic.File, "/")
 		err := os.Remove(topic.File)
 		if err != nil {
 			fmt.Printf("\n delete topic and delete file error[%s] \n", err.Error())
@@ -458,39 +519,45 @@ func (c *TopicController) TopicNotApproval() {
 func (c *TopicController) Download() {
 	topicId, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	topic := models.TopicManager.FindTopicById(topicId)
-	c.Ctx.Output.Download(topic.File)
+	c.Ctx.Output.Download(strings.TrimPrefix(topic.File, "/"))
 }
 
-func (c *TopicController) UploadFile() {
-	flash := beego.NewFlash()
-	f, h, err := c.GetFile("file")
-	if err == http.ErrMissingFile {
-		flash.Error("请选择文件")
-		flash.Store(&c.Controller)
-		c.Redirect("/topic/create", 302)
-	}
-	defer f.Close()
-	if err != nil {
-		flash.Error("上传失败")
-		flash.Store(&c.Controller)
-		c.Redirect("/topic/create", 302)
-		return
-	} else {
-		_, user := filters.IsLogin(c.Ctx)
+// func (c *TopicController) UploadFile() {
+// 	flash := beego.NewFlash()
+// 	f, h, err := c.GetFile("file")
+// 	if err == http.ErrMissingFile {
+// 		flash.Error("请选择文件")
+// 		flash.Store(&c.Controller)
+// 		c.Redirect("/topic/create", 302)
+// 		return
+// 	}
+// 	defer f.Close()
+// 	if err != nil {
+// 		flash.Error("上传失败")
+// 		flash.Store(&c.Controller)
+// 		c.Redirect("/topic/create", 302)
+// 		return
+// 	} else {
+// 		_, user := filters.IsLogin(c.Ctx)
 
-		dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
-			user.Username, "files", h.Filename)
+// 		uid := string([]rune(user.Token)[:5])
+// 		h.Filename = uid + "_" + h.Filename
 
-		c.SaveToFile("files", dirFile)
+// 		dirFile := fmt.Sprintf("%s/%s/%s/%s", beego.AppConfig.String("dirpath"),
+// 			user.Username, "files", h.Filename)
 
-		idStr := c.GetString("topicId")
-		topicId, _ := strconv.Atoi(idStr)
-		topic := models.TopicManager.FindTopicById(topicId)
-		topic.File = dirFile
+// 		c.SaveToFile("files", dirFile)
 
-		models.TopicManager.UpdateTopic(&topic)
-		flash.Success("上传成功")
-		flash.Store(&c.Controller)
-		c.Redirect(fmt.Sprintf("/topic/%s", idStr), 302)
-	}
-}
+// 		idStr := c.GetString("topicId")
+// 		topicId, _ := strconv.Atoi(idStr)
+// 		topic := models.TopicManager.FindTopicById(topicId)
+
+// 		topic.File = "/" + dirFile
+
+// 		models.TopicManager.UpdateTopic(&topic)
+// 		flash.Success("上传成功")
+// 		flash.Store(&c.Controller)
+// 		c.Redirect(fmt.Sprintf("/topic/%s", idStr), 302)
+// 		return
+// 	}
+// }

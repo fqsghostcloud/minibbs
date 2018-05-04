@@ -183,7 +183,7 @@ func (t *Topic) FindTopicByUser(user *User, limit int, page int, size int) utils
 
 	qs := o.QueryTable(topic)
 	countStr, _ := qs.Limit(-1).Count()
-	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&topics)
+	qs.RelatedSel().Filter("User", user).OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&topics)
 
 	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
 	return utils.PageUtil(count, page, size, topics)

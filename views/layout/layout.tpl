@@ -8,8 +8,11 @@
   <title>{{.PageTitle}}</title>
   <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css"/>
   <link rel="stylesheet" href="/static/css/minibbs.css">
+  <link rel="stylesheet"href="/static/editor/css/editormd.css" />
+  <script src="/static/js/jquery.min.js"></script>
   <script src="/static/js/jquery-1.10.1.min.js"></script>
   <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/static/editor/editormd.js"></script>
 
 </head>
 <body>
@@ -43,10 +46,11 @@
             <span class="dropdown-arrow"></span>
             <ul class="dropdown-menu">
               <li><a href="/user/setting">个人资料</a></li>
+              <li><a href="/topic/manage">发贴管理</a></li>
+              <li><a href="/user/{{.UserInfo.Username}}">最近动态</a></li>
               {{if haspermission .UserInfo.Id "user:list"}}<li><a href="/user/list">用户管理</a></li>{{end}}
               {{if haspermission .UserInfo.Id "role:list"}}<li><a href="/role/list">角色管理</a></li>{{end}}
               {{if haspermission .UserInfo.Id "permission:list"}}<li><a href="/permission/list">权限管理</a></li>{{end}}
-              {{if haspermission .UserInfo.Id "topic:manage"}}<li><a href="/topic/manage">发贴管理</a></li>{{end}}
                {{if haspermission .UserInfo.Id "tag:manage"}}<li><a href="/tag/manage">标签管理</a></li>{{end}}
               <li><a href="/logout">退出</a></li>
             </ul>

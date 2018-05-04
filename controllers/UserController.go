@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/astaxie/beego"
 )
@@ -63,6 +64,7 @@ func (c *UserController) Setting() {
 	flash.Success("更新资料成功")
 	flash.Store(&c.Controller)
 	c.Redirect("/user/setting", 302)
+	return
 }
 
 func (c *UserController) UpdatePwd() {
@@ -86,6 +88,7 @@ func (c *UserController) UpdatePwd() {
 	flash.Success("密码修改成功")
 	flash.Store(&c.Controller)
 	c.Redirect("/user/setting", 302)
+	return
 }
 
 func (c *UserController) UpdateAvatar() {
@@ -95,6 +98,7 @@ func (c *UserController) UpdateAvatar() {
 		flash.Error("请选择图片")
 		flash.Store(&c.Controller)
 		c.Redirect("/user/setting", 302)
+		return
 	}
 	defer f.Close()
 	if err != nil {
@@ -118,16 +122,19 @@ func (c *UserController) UpdateAvatar() {
 			return
 		}
 
+		user.Image = strings.TrimPrefix(user.Image, "/")
+
 		err = os.Remove(user.Image) //删除旧头像
 		if err != nil {
 			fmt.Printf("\n update avatar and delete old avatar error[%s] \n", err.Error())
 		}
 
-		user.Image = dirFile
+		user.Image = "/" + dirFile
 		models.UserManager.UpdateUser(&user)
 		flash.Success("上传成功")
 		flash.Store(&c.Controller)
 		c.Redirect("/user/setting", 302)
+		return
 	}
 }
 
@@ -178,6 +185,7 @@ func (c *UserController) Update() {
 			models.UserManager.SaveUserRole(id, roleId)
 		}
 		c.Redirect("/user/list", 302)
+		return
 	} else {
 		c.Ctx.WriteString("用户不存在")
 	}
@@ -198,6 +206,7 @@ func (c *UserController) Delete() {
 			}
 		}
 		c.Redirect("/user/list", 302)
+		return
 	} else {
 		c.Ctx.WriteString("用户不存在")
 	}

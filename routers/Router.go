@@ -38,6 +38,10 @@ func init() {
 	beego.Router("/topic/edit/:id([0-9]+)", &controllers.TopicController{}, "GET:Edit")
 	beego.Router("/topic/edit/:id([0-9]+)", &controllers.TopicController{}, "POST:Update")
 
+	// beego.InsertFilter("/topic/edit/insertpic", beego.BeforeRouter, filters.HasPermission)
+	// beego.InsertFilter("/topic/edit/insertpic", beego.BeforeRouter, filters.IsTopicUser)
+	beego.Router("/topic/edit/insertpic", &controllers.TopicController{}, "POST:InsertPic")
+
 	beego.InsertFilter("/topic/delete/:id([0-9]+)", beego.BeforeRouter, filters.HasPermission)
 	beego.InsertFilter("/topic/delete/:id([0-9]+)", beego.BeforeRouter, filters.IsTopicUser)
 	beego.Router("/topic/delete/:id([0-9]+)", &controllers.TopicController{}, "GET:Delete")

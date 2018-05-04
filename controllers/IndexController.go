@@ -44,6 +44,7 @@ func (c *IndexController) LoginPage() {
 	beego.ReadFromRequest(&c.Controller) // for flash data
 	if IsLogin {
 		c.Redirect("/", 302)
+		return
 	} else {
 		c.Data["PageTitle"] = "登录"
 		c.Layout = "layout/layout.tpl"
@@ -186,4 +187,5 @@ func (c *IndexController) Register() {
 func (c *IndexController) Logout() {
 	c.SetSecureCookie(beego.AppConfig.String("cookie.secure"), beego.AppConfig.String("cookie.token"), "", -1, "/", beego.AppConfig.String("cookie.domain"), false, true)
 	c.Redirect("/", 302)
+	return
 }
