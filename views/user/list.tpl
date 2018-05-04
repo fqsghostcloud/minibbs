@@ -2,6 +2,14 @@
   <div class="col-md-9">
     <div class="panel panel-default" style="height:600px">
     <div class="panel-heading">
+     {{if .flash.success}}
+        <div class="alert alert-success alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+            aria-hidden="true">&times;</span></button>
+          {{.flash.success}}
+        </div>
+        {{end}}
+        {{template "../components/flash_error.tpl" .}}
         <form class="form-inline" role="form" action="/user/list" method="get">
           <div class="form-group">
             <input type="text" class="form-control" name="searchName" placeholder="请输入用户名">

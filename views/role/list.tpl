@@ -5,6 +5,14 @@
         角色管理
         <a href="/role/add" class="pull-right">添加角色</a>
       </div>
+       {{if .flash.success}}
+        <div class="alert alert-success alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+            aria-hidden="true">&times;</span></button>
+          {{.flash.success}}
+        </div>
+        {{end}}
+        {{template "../components/flash_error.tpl" .}}
       <div class="table-responsive">
         <table class="table table-striped table-responsive">
           <tbody>

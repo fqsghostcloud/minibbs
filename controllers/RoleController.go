@@ -13,6 +13,7 @@ type RoleController struct {
 }
 
 func (c *RoleController) List() {
+	beego.ReadFromRequest(&c.Controller)
 	c.Data["PageTitle"] = "角色列表"
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 	c.Data["Roles"] = models.RoleManager.FindRoles()
@@ -48,6 +49,8 @@ func (c *RoleController) Save() {
 			_pid, _ := strconv.Atoi(pid)
 			models.RoleManager.SaveRolePermission(role_id, _pid)
 		}
+		flash.Success("添加角色成功")
+		flash.Store(&c.Controller)
 		c.Redirect("/role/list", 302)
 	}
 }
@@ -88,15 +91,20 @@ func (c *RoleController) Update() {
 			_pid, _ := strconv.Atoi(pid)
 			models.RoleManager.SaveRolePermission(id, _pid)
 		}
+		flash.Success("修改角色成功")
+		flash.Store(&c.Controller)
 		c.Redirect("/role/list", 302)
 	}
 }
 
 func (c *RoleController) Delete() {
+	flash := beego.NewFlash()
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
 		role := models.Role{Id: id}
 		models.RoleManager.DeleteRole(&role)
+		flash.Success("删除角色成功")
+		flash.Store(&c.Controller)
 		c.Redirect("/role/list", 302)
 	} else {
 		c.Ctx.WriteString("角色不存在")

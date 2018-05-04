@@ -139,6 +139,7 @@ func (c *UserController) UpdateAvatar() {
 }
 
 func (c *UserController) List() {
+	beego.ReadFromRequest(&c.Controller)
 	c.Data["PageTitle"] = "用户列表"
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 	page, _ := strconv.Atoi(c.Ctx.Input.Query("page"))
@@ -174,6 +175,7 @@ func (c *UserController) Edit() {
 }
 
 func (c *UserController) Update() {
+	flash := beego.NewFlash()
 	c.Data["PageTitle"] = "配置角色"
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
@@ -184,6 +186,8 @@ func (c *UserController) Update() {
 			roleId, _ := strconv.Atoi(v)
 			models.UserManager.SaveUserRole(id, roleId)
 		}
+		flash.Success("修改成功")
+		flash.Store(&c.Controller)
 		c.Redirect("/user/list", 302)
 		return
 	} else {
@@ -192,6 +196,7 @@ func (c *UserController) Update() {
 }
 
 func (c *UserController) Delete() {
+	flash := beego.NewFlash()
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
 		ok, user := models.UserManager.FindUserByID(id)
@@ -203,8 +208,14 @@ func (c *UserController) Delete() {
 			err := os.RemoveAll(deletePath)
 			if err != nil {
 				fmt.Printf("\n delete user and delete user dir error[%s] \n", err.Error())
+				flash.Error("删除用户时发生错误")
+				flash.Store(&c.Controller)
+				c.Redirect("/user/list", 302)
+				return
 			}
 		}
+		flash.Success("删除成功")
+		flash.Store(&c.Controller)
 		c.Redirect("/user/list", 302)
 		return
 	} else {

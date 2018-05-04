@@ -256,6 +256,7 @@ func (c *TopicController) Update() {
 }
 
 func (c *TopicController) Delete() {
+	flash := beego.NewFlash()
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
 		topic := models.TopicManager.FindTopicById(id)
@@ -272,10 +273,14 @@ func (c *TopicController) Delete() {
 
 		for _, v := range roles {
 			if v.Name == "管理员" {
+				flash.Success("删除帖子成功")
+				flash.Store(&c.Controller)
 				c.Redirect("/topic/manage", 302)
 				return
 			}
 		}
+		flash.Success("删除帖子成功")
+		flash.Store(&c.Controller)
 		c.Redirect("/", 302)
 		return
 	} else {
@@ -318,6 +323,7 @@ func (c *TopicController) Manage() {
 }
 
 func (c *TopicController) TagManage() {
+	beego.ReadFromRequest(&c.Controller)
 	c.Data["PageTitle"] = "标签列表"
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 
@@ -332,7 +338,6 @@ func (c *TopicController) TagManage() {
 }
 
 func (c *TopicController) SaveTag() {
-	beego.ReadFromRequest(&c.Controller)
 	flash := beego.NewFlash()
 	tagName := c.Input().Get("tagName")
 	if tagName == "" {
@@ -356,13 +361,16 @@ func (c *TopicController) SaveTag() {
 		fmt.Printf("\n save tag error[%s] \n", err.Error())
 		flash.Error("保存标签时发生错误")
 		flash.Store(&c.Controller)
+		c.Redirect("/tag/manage/", 302)
+		return
 	}
+	flash.Success("保存标签成功")
+	flash.Store(&c.Controller)
 	c.Redirect("/tag/manage/", 302)
 	return
 }
 
 func (c *TopicController) UpdateTag() {
-	beego.ReadFromRequest(&c.Controller)
 	flash := beego.NewFlash()
 	tagName := c.Input().Get("tagName")
 	id, _ := strconv.Atoi(c.Input().Get("id"))
@@ -397,13 +405,17 @@ func (c *TopicController) UpdateTag() {
 		fmt.Printf("\n update tag error[%s] \n", err.Error())
 		flash.Error("修改标签时发生错误")
 		flash.Store(&c.Controller)
+		c.Redirect("/tag/manage/", 302)
+		return
 	}
+
+	flash.Success("修改标签成功")
+	flash.Store(&c.Controller)
 	c.Redirect("/tag/manage/", 302)
 	return
 }
 
 func (c *TopicController) DeleteTag() {
-	beego.ReadFromRequest(&c.Controller)
 	flash := beego.NewFlash()
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {

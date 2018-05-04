@@ -13,6 +13,7 @@ type PermissionController struct {
 }
 
 func (c *PermissionController) List() {
+	beego.ReadFromRequest(&c.Controller)
 	c.Data["PageTitle"] = "权限列表"
 	c.Data["IsLogin"], c.Data["UserInfo"] = filters.IsLogin(c.Ctx)
 	pid, _ := strconv.Atoi(c.Ctx.Input.Query("pid"))
@@ -59,6 +60,8 @@ func (c *PermissionController) Save() {
 	} else {
 		permission := models.Permission{Pid: pid, Name: name, Url: url, Description: description}
 		models.PermissionManager.SavePermission(&permission)
+		flash.Success("添加权限成功")
+		flash.Store(&c.Controller)
 		c.Redirect("/permission/list?pid="+strconv.Itoa(pid), 302)
 		return
 	}
@@ -98,17 +101,22 @@ func (c *PermissionController) Update() {
 	} else {
 		permission := models.Permission{Id: id, Pid: pid, Name: name, Url: url, Description: description}
 		models.PermissionManager.UpdatePermission(&permission)
+		flash.Success("修改权限成功")
+		flash.Store(&c.Controller)
 		c.Redirect("/permission/list?pid="+strconv.Itoa(pid), 302)
 		return
 	}
 }
 
 func (c *PermissionController) Delete() {
+	flash := beego.NewFlash()
 	id, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	if id > 0 {
 		permission := models.Permission{Id: id}
 		models.PermissionManager.DeleteRolePermissionByPermissionId(id)
 		models.PermissionManager.DeletePermission(&permission)
+		flash.Success("删除权限成功")
+		flash.Store(&c.Controller)
 		c.Redirect("/permission/list", 302)
 		return
 	} else {
