@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-md-9">
-    <div class="panel panel-default" style="height:600px">
+    <div class="panel panel-default">
     <div class="panel-heading">
      {{if .flash.success}}
         <div class="alert alert-success alert-dismissible" role="alert">

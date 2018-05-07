@@ -22,7 +22,7 @@
         </form>
       </div>
     </div>
-    <div class="panel panel-default" style="height:470px">
+    <div class="panel panel-default">
       <div class="panel-heading">
         标签管理
         <span class="pull-right">{{.Page.TotalCount}}个</span>

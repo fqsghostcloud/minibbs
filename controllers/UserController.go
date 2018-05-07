@@ -71,19 +71,19 @@ func (c *UserController) UpdatePwd() {
 	flash := beego.NewFlash()
 	oldpwd, newpwd := c.Input().Get("oldpwd"), c.Input().Get("newpwd")
 	_, user := filters.IsLogin(c.Ctx)
-	if user.Password != oldpwd {
+	if !models.UserManager.CheckPwd(user.Password, oldpwd) {
 		flash.Error("旧密码不正确")
 		flash.Store(&c.Controller)
 		c.Redirect("/user/setting", 302)
 		return
 	}
 	if len(newpwd) == 0 {
-		flash.Error("新密码都不能为空")
+		flash.Error("新密码不能为空")
 		flash.Store(&c.Controller)
 		c.Redirect("/user/setting", 302)
 		return
 	}
-	user.Password = newpwd
+	user.Password = user.EncodePwd(newpwd)
 	models.UserManager.UpdateUser(&user)
 	flash.Success("密码修改成功")
 	flash.Store(&c.Controller)

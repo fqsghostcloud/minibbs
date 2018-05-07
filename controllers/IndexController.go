@@ -125,15 +125,6 @@ func (c *IndexController) Register() {
 
 	var token = uuid.Rand().Hex() // user token
 
-	user := models.User{
-		Username: username,
-		Password: password,
-		Email:    email,
-		Token:    token,
-		Image:    "/static/imgs/default.png",
-		Active:   true,
-	}
-
 	if exsit, _ := models.UserManager.FindUserByUserName(username); exsit {
 		flash.Error("用户名已被注册")
 		flash.Store(&c.Controller)
@@ -146,6 +137,15 @@ func (c *IndexController) Register() {
 		flash.Store(&c.Controller)
 		c.Redirect("/register", http.StatusFound)
 		return
+	}
+
+	user := models.User{
+		Username: username,
+		Password: password,
+		Email:    email,
+		Token:    token,
+		Image:    "/static/imgs/default.png",
+		Active:   true,
 	}
 
 	if err := models.UserManager.SaveUser(&user); err != nil {

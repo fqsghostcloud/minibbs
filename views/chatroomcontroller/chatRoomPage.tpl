@@ -6,8 +6,8 @@
           <span id="tid">{{.TopicId}}</span>
         </h3>
       </div>
-      <div class="panel-body topic-detail-header">
-        <div class="container" style="background-color:#E2DFD2;width:600px;height:360px;overflow: auto;overflow-x:hidden">
+      <div class="panel-body">
+        <div class="container" style="background-color:#f5f5f5;width:600px;height:460px;overflow: auto;overflow-x:hidden">
               <h3>聊天历史</h3>
               <ul id="chatbox">
                 <li>欢迎你，
