@@ -68,17 +68,6 @@
   </div>
 </div>
 
-<footer class="footer navbar-fixed-bottom" style="background-color:#f5f5f5;">
-    <div class="container">
-      <br>
-      <div class="text-center">
-        <a>Mini社区</a>
-      </div>
-      </br>
-    </div>
-</footer>
-
-
 {{.ChatRoomScript}}
 {{.TopicScript}}
 </body>
