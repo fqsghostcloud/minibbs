@@ -124,9 +124,11 @@ func (c *UserController) UpdateAvatar() {
 
 		user.Image = strings.TrimPrefix(user.Image, "/")
 
-		err = os.Remove(user.Image) //删除旧头像
-		if err != nil {
-			fmt.Printf("\n update avatar and delete old avatar error[%s] \n", err.Error())
+		if !strings.Contains(user.Image, "default") {
+			err = os.Remove(user.Image) //删除旧头像
+			if err != nil {
+				fmt.Printf("\n update avatar and delete old avatar error[%s] \n", err.Error())
+			}
 		}
 
 		user.Image = "/" + dirFile
