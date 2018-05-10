@@ -262,26 +262,22 @@ func (c *TopicController) Delete() {
 		topic := models.TopicManager.FindTopicById(id)
 		models.TopicManager.DeleteTopic(&topic)
 		models.TopicManager.DeleteTopicTagsByTopicId(id)
-		_, user := filters.IsLogin(c.Ctx)
-		roles := models.RoleManager.FindRolesByUser(&user)
 
-		topic.File = strings.TrimPrefix(topic.File, "/")
-		err := os.Remove(topic.File)
-		if err != nil {
-			fmt.Printf("\n delete topic and delete file error[%s] \n", err.Error())
-		}
-
-		for _, v := range roles {
-			if v.Name == "管理员" {
-				flash.Success("删除帖子成功")
+		if topic.File != "" {
+			topic.File = strings.TrimPrefix(topic.File, "/")
+			err := os.Remove(topic.File)
+			if err != nil {
+				fmt.Printf("\n delete topic and delete file error[%s] \n", err.Error())
+				flash.Error("删除帖子时，删除帖子附件失败")
 				flash.Store(&c.Controller)
 				c.Redirect("/topic/manage", 302)
 				return
 			}
 		}
+
 		flash.Success("删除帖子成功")
 		flash.Store(&c.Controller)
-		c.Redirect("/", 302)
+		c.Redirect("/topic/manage", 302)
 		return
 	} else {
 		c.Ctx.WriteString("话题不存在")

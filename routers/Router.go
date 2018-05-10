@@ -9,7 +9,6 @@ import (
 
 func init() {
 
-	beego.Router("/test", &controllers.TestController{}, "GET:TestActive")
 	//登录注册
 	beego.Router("/", &controllers.IndexController{}, "GET:Index")
 	beego.Router("/login", &controllers.IndexController{}, "GET:LoginPage")

@@ -6,7 +6,6 @@ import (
 	"minibbs/models"
 	"net/http"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -41,16 +40,7 @@ func (c *UserController) ToSetting() {
 
 func (c *UserController) Setting() {
 	flash := beego.NewFlash()
-	email, signature := c.Input().Get("email"), c.Input().Get("signature")
-	if len(email) > 0 {
-		ok, _ := regexp.MatchString("^([a-z0-9A-Z]+[-|_|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$", email)
-		if !ok {
-			flash.Error("请输入正确的邮箱地址")
-			flash.Store(&c.Controller)
-			c.Redirect("/user/setting", 302)
-			return
-		}
-	}
+	signature := c.Input().Get("signature")
 	if len(signature) > 1000 {
 		flash.Error("个人签名长度不能超过1000字符")
 		flash.Store(&c.Controller)
@@ -58,7 +48,6 @@ func (c *UserController) Setting() {
 		return
 	}
 	_, user := filters.IsLogin(c.Ctx)
-	user.Email = email
 	user.Signature = signature
 	models.UserManager.UpdateUser(&user)
 	flash.Success("更新资料成功")

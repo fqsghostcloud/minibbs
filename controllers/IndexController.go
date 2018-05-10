@@ -97,14 +97,13 @@ func (c *IndexController) Login() {
 
 // RegisterPage .
 func (c *IndexController) RegisterPage() {
+	beego.ReadFromRequest(&c.Controller)
 	isLogin, _ := filters.IsLogin(c.Ctx)
-
 	if isLogin {
 		c.Redirect("/", http.StatusFound)
 		return
 	}
 
-	beego.ReadFromRequest(&c.Controller)
 	c.Data["PageTitle"] = "用户注册"
 	c.Layout = "layout/layout.tpl"
 	c.TplName = "register.tpl"
