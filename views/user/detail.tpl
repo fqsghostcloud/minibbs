@@ -59,7 +59,7 @@
           <td>
             {{.InTime | timeago}}
             回复了
-            <a href="/user/{{.User.Username}}">{{.User.Username}}</a>
+            <a href="/user/{{.Topic.Id | getTopicUser}}">{{.Topic.Id | getTopicUser}}</a>
             创建的话题 › <a href="/topic/{{.Topic.Id}}">{{.Topic.Title}}</a>
           </td>
         </tr>

@@ -42,6 +42,14 @@ func GetTopicTags(topicId int) []models.Tag {
 	return models.TagManager.FindTagsByTopic(&topic)
 }
 
+func GetTopicUser(topicId int) string {
+	isExsit, user := models.UserManager.FindUserByTopicId(topicId)
+	if isExsit {
+		return user.Username
+	}
+	return ""
+}
+
 func IsAdmin(user models.User) bool {
 	roles := models.RoleManager.FindRolesByUser(&user)
 	for _, v := range roles {
@@ -64,4 +72,5 @@ func init() {
 	beego.AddFuncMap("isAdmin", IsAdmin)
 	beego.AddFuncMap("isTopicUser", IsTopicUser)
 	beego.AddFuncMap("hasFile", HasFile)
+	beego.AddFuncMap("getTopicUser", GetTopicUser)
 }

@@ -30,7 +30,7 @@ type API interface {
 	FindUserByToken(token string) (bool, User)
 	FindUserByUserName(username string) (bool, User)
 	FindUserByUserEmail(email string) (bool, User)
-	FindUserByTopic(topic *Topic) (bool, User)
+	FindUserByTopicId(topicId int) (bool, User)
 	FindPermissionByUser(id int) []*Permission
 
 	SaveUser(user *User) error
@@ -88,10 +88,10 @@ func (u *User) CheckPwd(encodePwd string, pwd string) bool {
 	return false
 }
 
-func (u *User) FindUserByTopic(topic *Topic) (bool, User) {
+func (u *User) FindUserByTopicId(topicId int) (bool, User) {
 	o := orm.NewOrm()
 	user := User{}
-	err := o.QueryTable(Topic{}).Filter("User", topic.Id).One(&user)
+	err := o.QueryTable(User{}).Filter("Topics__Id", topicId).One(&user)
 	if err != nil {
 		return false, user
 	}

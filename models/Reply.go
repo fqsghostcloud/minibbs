@@ -72,6 +72,7 @@ func (r *Reply) FindReplyByUser(user *User, limit int, page int, size int) utils
 	var reply Reply
 	var replies []Reply
 
+	// 不分页
 	if page == 0 || size == 0 {
 		o.QueryTable(reply).RelatedSel("Topic", "User").Filter("User", user).OrderBy("-InTime").Limit(limit).All(&replies)
 		page := utils.Page{List: replies}
@@ -79,8 +80,8 @@ func (r *Reply) FindReplyByUser(user *User, limit int, page int, size int) utils
 	}
 
 	qs := o.QueryTable(reply)
-	countStr, _ := qs.Limit(-1).Count()
-	qs.RelatedSel().OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&replies)
+	countStr, _ := qs.RelatedSel().Filter("User", user).Limit(-1).Count()
+	qs.RelatedSel().Filter("User", user).OrderBy("-InTime").Limit(size).Offset((page - 1) * size).All(&replies)
 
 	count, _ := strconv.Atoi(strconv.FormatInt(countStr, 10))
 	return utils.PageUtil(count, page, size, replies)
